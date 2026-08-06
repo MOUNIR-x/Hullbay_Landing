@@ -1,0 +1,27 @@
+﻿---
+title: "Dépannage et ressources orphelines"
+sidebar_label: "Dépannage"
+description: "Guide de résolution des problèmes courants, nettoyage des ressources orphelines, détection de dérive et reconstruction de la base de données."
+---
+
+# Dépannage et ressources orphelines
+
+Même avec une plateforme robuste comme Hullbay, des situations imprévues peuvent survenir : ressources orphelines après une manipulation manuelle, dérive entre l'état désiré et réel, ou corruption de la base de données. Ce guide vous aide à diagnostiquer et résoudre ces problèmes.
+
+---
+
+## 🧹 1. Ressources orphelines et commande Prune
+
+### Qu'est-ce qu'une ressource orpheline ?
+
+Une ressource orpheline est un conteneur, réseau ou volume Docker qui existe dans le cluster mais n'est plus référencé dans la base de données Hullbay. Cela peut arriver si :
+- Vous supprimez un projet via `DELETE /api/projects/:id` sans faire `POST /api/projects/:id/destroy` d'abord.
+- Vous manipulez Docker directement via la CLI (`docker rm`, `docker network prune`).
+- Un déploiement échoue partiellement et laisse des artefacts.
+
+### Aperçu des orphelins (mode dry-run)
+
+Avant de supprimer quoi que ce soit, consultez la liste des candidats. Cette route est accessible aux rôles `operator` et `owner`.
+
+```bash
+GET /api/prune

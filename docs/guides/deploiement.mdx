@@ -1,0 +1,63 @@
+﻿---
+title: "Déployer un projet"
+sidebar_label: "Déployer un projet"
+description: "Guide complet pour concevoir, planifier et déployer une application sur le cluster via le canvas."
+---
+
+# Déployer un projet
+
+Le déploiement sur Hullbay n'est pas une simple exécution de commande. C'est un flux de travail structuré en trois étapes : **Conception**, **Planification** et **Exécution**. Cette approche garantit qu'aucune modification destructive n'est appliquée sans votre validation explicite.
+
+---
+
+## 🎨 1. Conception sur le Canvas
+
+1. Accédez à votre projet dans l'interface.
+2. Utilisez la **Palette** (panneau latéral) pour glisser-déposer des nœuds :
+   - **Container** : Définissez l'image (ex: `nginx:alpine`), les variables d'environnement et les ports.
+   - **Network** : Créez un réseau pour isoler ce projet.
+   - **Volume** : Ajoutez un volume persistant si nécessaire (ex: pour une base de données).
+   - **Gateway** : Ajoutez une passerelle pour exposer le container à l'extérieur.
+3. **Connectez les nœuds** en cliquant sur un point de connexion (handle) et en le glissant vers un autre nœud compatible. Le système validera automatiquement la compatibilité des types.
+
+:::info Astuce
+Les positions (X, Y) des nœuds sont sauvegardées automatiquement. Vous pouvez organiser votre canvas de manière logique pour faciliter la lecture de l'architecture.
+:::
+
+---
+
+## 🔍 2. Planification (Le "Plan")
+
+Avant d'appliquer les changements, Hullbay calcule la différence entre votre dessin (État Désiré) et le cluster (État Réel).
+
+1. Cliquez sur le bouton **"Revoir et déployer"** en haut à droite du canvas.
+2. Une modale s'ouvre, affichant le **Plan d'actions** généré par le Réconcilier :
+   - 🟢 **Create** : Ressource à créer (nouveau conteneur, réseau, etc.).
+   - 🟡 **Update** : Ressource existante à modifier (changement de variable d'environnement, d'image).
+   - ⚪ **Noop** : Aucune action requise (la ressource est déjà conforme).
+   - 🔴 **Remove** : Ressource à supprimer (nœud retiré du canvas).
+3. **Validez** le plan en cliquant sur "Confirmer le déploiement".
+
+---
+
+## 🚀 3. Exécution et Rollback
+
+Une fois confirmé, le déploiement commence.
+
+- **Exécution séquentielle** : Les ressources sont créées dans un ordre logique (Réseaux → Volumes → Secrets → Conteneurs → Routes Caddy).
+- **Verrouillage** : Pendant le déploiement, le projet est verrouillé. Toute nouvelle tentative de déploiement renverra une erreur `409 Conflict`.
+- **Rollback automatique** : Si une erreur `422 Unprocessable Entity` survient (ex: image introuvable, secret manquant), le système **annule automatiquement** (défait) toutes les ressources créées pendant cette tentative. Le statut du projet passe à `error`, et vous pouvez corriger la configuration sans laisser de "déchets" dans le cluster.
+
+---
+
+## 🧹 4. Destruction propre
+
+Pour supprimer un projet déployé :
+
+1. Cliquez sur le bouton **"Détruire"** (icône poubelle) dans l'en-tête du projet.
+2. Confirmez la destruction.
+3. Hullbay supprimera les ressources dans l'ordre inverse du déploiement (Routes Caddy → Conteneurs → Volumes → Réseaux), en attendant la disparition complète des tâches Swarm pour éviter les erreurs de dépendance.
+
+:::warning Ne pas confondre avec "Supprimer"
+Le bouton "Supprimer" (dans les paramètres du projet) efface uniquement le dessin (l'état désiré en base de données). Si le projet est déployé, utilisez **toujours** "Détruire" d'abord, sinon vous créerez des ressources orphelines dans Docker.
+:::

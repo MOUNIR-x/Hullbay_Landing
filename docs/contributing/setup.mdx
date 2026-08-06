@@ -1,0 +1,30 @@
+﻿---
+title: "Mise en place de l'environnement de développement"
+sidebar_label: "Mise en place"
+description: "Guide pas à pas pour configurer l'environnement de développement local de Hullbay, installer les dépendances et lancer la pile en mode watch."
+---
+
+# Mise en place de l'environnement de développement
+
+Ce guide détaille la procédure pour cloner, configurer et lancer Hullbay en local. Le projet étant un monorepo, le développement local repose sur l'exécution simultanée de plusieurs services en mode watch.
+
+---
+
+## ️ 1. Prérequis
+
+Avant de commencer, assurez-vous d'avoir les outils suivants installés sur votre machine :
+
+- **Node.js** : Version 20 ou supérieure (avec npm).
+- **Docker** : Un démon Docker local fonctionnel (requis pour les bases de données et le proxy Caddy).
+- **Git** : Pour cloner le dépôt.
+
+---
+
+## 📥 2. Clonage et installation des dépendances
+
+Clonez le dépôt et installez les dépendances de tous les workspaces :
+
+```bash
+git clone https://github.com/Fotetsa/hullbay.git
+cd hullbay
+npm install

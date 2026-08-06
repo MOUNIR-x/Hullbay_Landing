@@ -1,0 +1,45 @@
+﻿---
+title: "Changelog et notes de version"
+sidebar_label: "Changelog"
+description: "Historique des versions, fonctionnalités majeures et corrections de bugs de la plateforme Hullbay."
+---
+
+# Changelog
+
+Ce document retrace les évolutions majeures, les refontes architecturales et les corrections de bugs de Hullbay.
+
+---
+
+##  Version 0.1.0 (Release Initiale)
+
+La première version publique de Hullbay pose les bases d'une plateforme PaaS visuelle, sécurisée et auto-hébergeable pour Docker Swarm.
+
+### ✨ Nouvelles fonctionnalités
+- **Canvas Visuel GNS3-like** : Interface React Flow pour dessiner, connecter et déployer des infrastructures (conteneurs, réseaux, volumes, gateways Caddy).
+- **Moteur de Réconciliation** : Comparaison État Désiré vs État Réel avec génération de plans (`create`, `update`, `remove`) et rollback automatique en cas d'erreur `422`.
+- **Sécurité "Secure by Default"** :
+  - MFA TOTP obligatoire avec garde middleware stricte.
+  - Proxy Docker filtré (`tecnativa/docker-socket-proxy`) bloquant `EXEC` et les accès bruts.
+  - Chiffrement AES-256-GCM des clés SSH, tokens registry et seeds MFA.
+- **Provisionnement SSH** : Ajout de serveurs distants avec génération de clés éphémères et gestion TOFU.
+- **Observabilité temps réel** : Détection de dérive (Drift), métriques CPU/RAM, et logs en direct via WebSockets.
+- **RBAC complet** : Rôles `owner`, `operator`, `viewer` avec journal d'audit centralisé.
+
+### 🎨 UI/UX et Accessibilité
+- Refonte complète de la console web suite à un audit DevOps.
+- Palette utilisable au clavier, gestion des focus, attributs `aria-label` et `aria-live` sur les logs de déploiement.
+- Modale "Revoir et déployer" avec diff du plan et validation de cohérence du graphe.
+
+### ️ Architecture et Interne
+- **Monorepo TypeScript** : Packages `@hullbay/shared` (Zod schemas), `@hullbay/api` (Fastify/Prisma), `@hullbay/web` (Vite/React).
+- **Double source de vérité** : Les labels Docker `bozando.*` agissent comme source redondante permettant la reconstruction de la BDD via `rebuild-from-docker`.
+- **Garde œuf-poule** : Label `bozando.system=true` protégeant la pile Hullbay contre le nettoyage `prune`.
+
+### 🐛 Corrections de bugs connues
+- Correction du redémarrage intempestif de Caddy lorsque `PUBLIC_HOST` était vide après l'installation.
+- Application du nom de domaine via l'API admin Caddy.
+- *(Bug connu non corrigé)* : Double émission de l'événement `server.provisioned` dans l'audit.
+- *(Bug connu non corrigé)* : Absence d'émission des événements `mfa.enabled` et `rebuild.finished` dans le journal d'audit (code mort).
+
+### 🔄 Refonte et Nommage
+- Remplacement systématique de l'identifiant `bozando-ops` par `hullbay` dans la documentation, les UI et les configurations, tout en conservant `bozando` pour les labels Docker et la base de données afin d'assurer la stabilité.

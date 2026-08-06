@@ -1,0 +1,71 @@
+﻿---
+title: "Architecture interne et décisions (ADR)"
+sidebar_label: "Architecture & ADR"
+description: "Vue d'ensemble de l'architecture technique de Hullbay et documentation des décisions architecturales majeures (ADR)."
+---
+
+# Architecture interne et décisions (ADR)
+
+Ce document expose les choix techniques fondamentaux qui ont façonné Hullbay. Il est destiné aux contributeurs souhaitant comprendre le "pourquoi" derrière le code.
+
+---
+
+## 🏗️ 1. Vue d'ensemble de l'architecture
+
+Hullbay est une application **Full-Stack TypeScript** conçue pour être auto-hébergée sur un unique VPS ou un cluster Docker Swarm.
+
+### Le Frontend (`@hullbay/web`)
+- **Moteur de rendu** : React 18 + Vite.
+- **Canvas** : `@xyflow/react` (React Flow) pour la manipulation visuelle des nœuds et des arêtes.
+- **État serveur** : `@tanstack/react-query` pour le caching, la synchronisation et les états de chargement.
+- **Temps réel** : `socket.io-client` pour recevoir les événements de déploiement et les logs.
+- **UI** : `@medusajs/ui` pour un design system cohérent et accessible.
+
+### Le Backend (`@hullbay/api`)
+- **Framework** : Fastify (pour sa performance et son système de plugins).
+- **Validation** : `zod` couplé à `fastify-type-provider-zod` pour un typage de bout en bout des routes.
+- **Base de données** : PostgreSQL via Prisma ORM.
+- **Moteur Docker** : `dockerode` pour interagir avec l'API Docker.
+- **Provisionnement** : `ssh2` pour les connexions distantes sécurisées.
+
+---
+
+## 📜 2. Décisions Architecturales (ADR)
+
+Les ADR (Architecture Decision Records) documentent les choix critiques qui sont difficiles à changer a posteriori.
+
+### ADR 001 : Docker Swarm au lieu de Kubernetes
+**Contexte** : Il fallait choisir un orchestrateur pour gérer le multi-nœud et le déploiement de services.
+**Décision** : Utiliser Docker Swarm natif.
+**Justification** :
+- **Simplicité** : Swarm est intégré à Docker. Pas besoin d'installer `kubeadm`, `kubectl`, ou de gérer des fichiers YAML complexes.
+- **Cible** : Hullbay vise les développeurs et les petites équipes sur 1 à N VPS. La complexité de Kubernetes est disproportionnée pour ce cas d'usage.
+- **API** : L'API Docker Swarm est suffisante pour gérer les services, les réseaux overlay et les secrets chiffrés (Raft).
+
+### ADR 002 : Les labels Docker comme source de vérité redondante
+**Contexte** : Comment garantir que l'interface visuelle reflète toujours la réalité du cluster, même si la base de données est corrompue ?
+**Décision** : Utiliser les labels Docker (`bozando.projectId`, `bozando.spec`, etc.) comme source de vérité secondaire.
+**Justification** :
+- **Résilience** : La fonction `rebuildFromDocker()` peut scanner le cluster et reconstruire entièrement les tables PostgreSQL à partir des labels.
+- **Cache de confort** : PostgreSQL n'est qu'un cache opérationnel pour accélérer les requêtes et stocker l'historique (audit, positions du canvas). L'état réel vit dans Docker.
+
+### ADR 003 : Isolation du socket Docker via Proxy
+**Contexte** : Monter `/var/run/docker.sock` dans le conteneur API donne un accès root total à l'hôte.
+**Décision** : Interposer `tecnativa/docker-socket-proxy` entre l'API et le socket.
+**Justification** :
+- **Réduction de surface** : Le proxy bloque explicitement les appels `/exec` et la manipulation brute des conteneurs (`CONTAINERS=0`).
+- **Sécurité** : L'API ne peut faire que ce qui est strictement nécessaire à l'orchestration Swarm (Services, Networks, Volumes, Secrets).
+
+### ADR 004 : Le paradoxe de l'œuf et la poule (Garde Système)
+**Contexte** : Hullbay déploie des conteneurs. Mais qui déploie Hullbay ? Et comment empêcher Hullbay de se supprimer lui-même lors d'un nettoyage ?
+**Décision** : 
+1. Hullbay est déployé via un `docker-compose.yml` classique, hors de son propre canvas.
+2. Tous les conteneurs de la pile reçoivent le label `bozando.system=true`.
+**Justification** :
+- Le moteur de `prune` et de `destroy` ignore systématiquement ce label. Il est donc impossible pour l'UI de démanteler l'ops-panel.
+
+### ADR 005 : PostgreSQL comme cache, pas comme maître
+**Contexte** : Dans les PaaS classiques, la BDD est le maître absolu. Si elle ment, le déploiement échoue.
+**Décision** : Le Réconcilier (Reconciler) fait toujours un état des lieux réel via l'API Docker avant d'agir.
+**Justification** :
+- Cela permet la détection de dérive (Drift Detection). Si un utilisateur modifie un conteneur manuellement via la CLI Docker, Hullbay le verra au prochain cycle (60s) et proposera une correction. La BDD n'est pas une vérité absolue, c'est une intention.

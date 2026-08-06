@@ -1,0 +1,21 @@
+﻿---
+title: "Standards de code et tests"
+sidebar_label: "Standards & Tests"
+description: "Conventions de code, structure du monorepo, workflow Git et vérifications obligatoires avant de soumettre une Pull Request sur Hullbay."
+---
+
+# Standards de code et tests
+
+Maintenir la qualité et la cohérence du code est essentiel sur un projet d'infrastructure comme Hullbay. Ce document détaille les conventions, l'architecture du monorepo et les étapes obligatoires avant toute soumission.
+
+---
+
+##  1. Structure du Monorepo et règle d'or
+
+Le projet est organisé en trois packages interdépendants via les workspaces npm :
+
+```text
+packages/
+├── shared   # Modèles de domaine, schémas Zod, types TypeScript
+├── api      # Backend Fastify, Prisma, Dockerode, logique métier
+└── web      # Frontend React, Vite, React Flow, UI

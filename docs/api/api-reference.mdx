@@ -1,0 +1,326 @@
+﻿---
+title: "Référence API complète"
+sidebar_label: "API complète"
+description: "Documentation technique route par route de l'API Hullbay : authentification, projets, réconciliation, infrastructure, observabilité et WebSockets."
+---
+
+# Référence API complète
+
+Cette page documente l'intégralité de l'API REST et WebSocket de Hullbay. L'API est construite avec **Fastify** et utilise **Zod** pour la validation stricte des schémas de requêtes et de réponses.
+
+:::info Note sur le nommage technique
+Bien que le produit s'appelle **Hullbay**, le code source interne utilise encore l'identifiant technique `bozando` (ex: labels Docker `bozando.*`, base de données `bozando_ops`). Les extraits de code ci-dessous reflètent fidèlement le dépôt réel.
+:::
+
+---
+
+##  Aperçu général
+
+### URL de base
+Toutes les routes sont préfixées par `/api/*`. En développement, Vite proxifie `/api` vers `http://127.0.0.1:4000`.
+
+## Exemples d'appels (curl)
+
+Ces exemples montrent les opérations courantes : authentification, lecture du plan et déclenchement d'un déploiement.
+
+- Login (obtenir un JWT) :
+
+```bash
+curl -X POST http://127.0.0.1:4000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"owner@example.com","password":"votre-mot-de-passe"}'
+```
+
+- Récupérer le plan d'un projet :
+
+```bash
+curl -X GET "http://127.0.0.1:4000/api/projects/<PROJECT_ID>/plan" \
+  -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+- Déclencher un déploiement validé :
+
+```bash
+curl -X POST "http://127.0.0.1:4000/api/projects/<PROJECT_ID>/deploy" \
+  -H "Authorization: Bearer <JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"confirm":true}'
+```
+
+Remplacez `<PROJECT_ID>` et `<JWT_TOKEN>` par vos valeurs réelles.
+
+---
+
+## Principes communs
+
+- **Validation** : toutes les requêtes sont validées via `zod`. Les erreurs de validation retournent un `400` avec le champ `details` (voir ci-dessous).
+- **Authentification** : JWT Bearer dans l'en-tête `Authorization: Bearer <token>`.
+- **Content-Type** : `application/json` pour les corps JSON.
+- **Pagination** : les listes acceptent souvent `?page=` et `?perPage=` et retournent des métadonnées `{ total, page, perPage }`.
+
+---
+
+## Endpoints clés (exemples détaillés)
+
+### 1) POST /api/auth/login
+- Description : authentifie un utilisateur et retourne un token JWT.
+- Request body (application/json):
+
+```json
+{
+  "email": "owner@example.com",
+  "password": "votre-mot-de-passe"
+}
+```
+
+- Success (200):
+
+```json
+{
+  "token": "eyJhbGci...",
+  "user": { "id": "u_123", "email": "owner@example.com", "mfaEnabled": true }
+}
+```
+
+- Erreurs courantes : `400` (validation), `401` (identifiants invalides)
+
+### 2) GET /api/projects
+- Description : liste des projets pour l'utilisateur.
+- Query params : `page`, `perPage`, `search`
+- Success (200):
+
+```json
+{
+  "data": [ { "id": "p_1", "name": "mon-site-web", "status": "deployed" } ],
+  "meta": { "total": 1, "page": 1, "perPage": 10 }
+}
+```
+
+### 3) GET /api/projects/:projectId/plan
+- Description : calcule et retourne le plan de reconciliation entre l'état désiré et l'état réel.
+- Headers : `Authorization: Bearer <token>`
+- Success (200):
+
+```json
+{
+  "projectId": "p_1",
+  "plan": [ { "action": "create", "resource": "network", "name": "..." }, { "action": "create", "resource": "service", "name": "..." } ]
+}
+```
+
+- Erreurs : `404` (projet non trouvé), `403` (MFA manquante)
+
+### 4) POST /api/projects/:projectId/deploy
+- Description : exécute le plan précédemment calculé. L'appel doit contenir un token valide.
+- Body: `{ "confirm": true }`
+- Success (200):
+
+```json
+{ "status": "started", "deploymentId": "d_42" }
+```
+
+- Erreurs : `409` (déploiement concurrent), `422` (erreur actionnable, rollback effectué)
+
+---
+
+## Format des erreurs (rappel)
+En cas d'échec de validation Zod, l'API renvoie un `400` structuré :
+```json
+{
+  "statusCode": 400,
+  "error": "Validation echouee",
+  "details": {
+    "email": ["Invalid email"],
+    "password": ["String must contain at least 8 character(s)"]
+  }
+}
+```
+
+Autres erreurs types:
+- `401 Unauthorized` — token manquant ou invalide
+- `403 Forbidden` — MFA non activée ou droits insuffisants
+- `404 Not Found` — ressource inexistante
+- `409 Conflict` — opération en conflit (ex: déploiement concurrent)
+- `422 Unprocessable Entity` — erreur détectée pendant l'exécution (image manquante, secret absent)
+
+---
+
+## WebSocket / realtime
+
+Hullbay expose un canal WebSocket pour recevoir des événements de déploiement et des logs en temps réel.
+
+- URL (exemple local) : `ws://127.0.0.1:4000/ws` (ou `wss://your.hullbay.server/ws` en prod)
+- Auth : token JWT en query param `?token=<JWT_TOKEN>` ou via header `Authorization` si le client le supporte.
+
+Message d'abonnement exemple:
+
+```json
+{
+  "type": "subscribe",
+  "channel": "project: p_1:deployments"
+}
+```
+
+Message d'événement exemple (server → client):
+
+```json
+{
+  "type": "deployment:event",
+  "deploymentId": "d_42",
+  "level": "info",
+  "message": "service created: mon-site-web-web-server",
+  "timestamp": "2026-08-05T12:34:56Z"
+}
+```
+
+Reconnexion : implémentez une logique d'exponentielle backoff avec jitter et vérifiez l'authentification si le token a expiré.
+
+---
+
+## Référence complète des endpoints
+
+La liste ci-dessous couvre les endpoints exposés par le serveur API (implémentation : packages/api/src/modules/*). Pour chaque route : méthode, chemin, rôle minimal requis, corps attendu (si présent) et réponse typique.
+
+Auth
+- POST /api/auth/bootstrap — Public. Body: `{ email, password }`. Crée le premier compte owner. 201/409.
+- GET /api/auth/needs-bootstrap — Public. Retourne `{ needsBootstrap: boolean }`.
+- POST /api/auth/login — Public. Body: `{ email, password }`. Retourne `{ token, user }` ou `401`.
+- POST /api/auth/mfa/verify — Public. Body: `{ pendingToken, code }`. Vérifie un code MFA.
+- POST /api/auth/mfa/enroll — Authed. Démarre l'enrôlement MFA. Retourne un challenge.
+- POST /api/auth/mfa/confirm — Authed. Body: `{ code }`. Confirme l'enrôlement MFA.
+- GET /api/auth/me — Authed. Retourne `id,email,role,mfaEnabled`.
+- POST /api/auth/password — Authed. Body: `{ currentPassword, newPassword }`. Change mot de passe.
+
+Users & Audit (owner/operator)
+- GET /api/users — Owner. Liste utilisateurs.
+- POST /api/users — Owner. Body: `{ email, password, role }`. Crée un utilisateur.
+- POST /api/users/:id/role — Owner. Body: `{ role }`. Change rôle d'un utilisateur.
+- DELETE /api/users/:id — Owner. Supprime un utilisateur.
+- GET /api/audit — Operator. Journal d'audit paginé. Query: `limit`, `offset`, `action`.
+
+Projects & Canvas (viewer/operator)
+- GET /api/projects — Viewer. Liste des projets.
+- GET /api/projects/:id — Viewer. Détail graph projet (`ProjectGraph`).
+- POST /api/projects — Operator. Body: `{ name, description? }`. Crée un projet.
+- PATCH /api/projects/:id — Operator. Body: `{ name?, description? }`. Met à jour.
+- DELETE /api/projects/:id — Operator. Supprime le projet du désiré.
+
+Nodes
+- POST /api/projects/:id/nodes — Operator. Body: `{ type, name, posX, posY, config }`. Crée un noeud.
+- POST /api/nodes/:nodeId — Operator. Body: `{ name?, posX?, posY?, config? }`. Met à jour un noeud.
+- DELETE /api/nodes/:nodeId — Operator. Supprime un noeud.
+
+Edges
+- POST /api/projects/:id/edges — Operator. Body: `{ sourceNodeId, targetNodeId, kind?, config? }`. Crée un lien.
+- POST /api/edges/:edgeId — Operator. Body: `{ config? }`. Met à jour un lien.
+- DELETE /api/edges/:edgeId — Operator. Supprime un lien.
+
+Reconciler / Déploiement (operator/owner)
+- GET /api/projects/:id/plan — Operator. Retourne le plan (diff) entre désiré et réel.
+- POST /api/projects/:id/deploy — Operator. Body: `{ confirm: true }` (UI). Lance le déploiement, retourne `{ ok, log }` ou `422/409/500`.
+- POST /api/projects/:id/destroy — Operator. Détruit les ressources réelles du projet (inverse du deploy).
+- POST /api/rebuild-from-docker — Operator. Reconstruit le désiré depuis l'état Docker labels.
+- GET /api/prune — Operator. Aperçu dry-run des orphelins.
+- POST /api/prune — Owner. Applique la suppression des orphelins.
+
+Observability & Health (viewer)
+- GET /api/health/cluster — Viewer. Santé du cluster (nœuds Swarm + métriques par service).
+- GET /api/services/:id/metrics — Viewer. Métriques d'un service (replicas, CPU, mémoire).
+- GET /api/drift — Viewer. Snapshot de drift courant.
+- GET /api/projects/:id/placement — Viewer. Serveurs où tourne le projet.
+
+Secrets (operator/owner)
+- GET /api/secrets — Operator/Owner. Liste des secrets (noms/id seulement).
+- POST /api/secrets — Operator/Owner. Body: `{ name, value }`. Écrit la valeur (write-only). Retourne `{ ok, name }`.
+- DELETE /api/secrets/:name — Operator/Owner. Supprime un secret.
+
+Servers (owner)
+- GET /api/servers — Owner. Liste serveurs connus + état Swarm.
+- POST /api/servers — Owner. Body: `{ name, host, port?, user?, role?, credential }`. Provisionne (202 provisioning).
+- DELETE /api/servers/:id — Owner. Retire un serveur (drain + rm).
+- POST /api/servers/:id/role — Owner. Body: `{ role: "manager" | "worker" }`. Change rôle Swarm.
+
+Registry (owner)
+- GET /api/registry — Owner. Liste credentials.
+- POST /api/registry — Owner. Body: `{ registry?, username, token }`. Ajoute/replace credential.
+- DELETE /api/registry/:id — Owner. Supprime credential.
+
+Settings (owner)
+- GET /api/settings/domain — Owner. Retourne le domaine configuré.
+- POST /api/settings/domain — Owner. Body: `{ domain }`. Définit le domaine (Caddy integration).
+
+Misc
+- GET /health — Public. Statut simple `{ ok: true, service: "hullbay" }`.
+- GET /health/docker — Public. Vérifie accès à Docker daemon.
+
+---
+
+Si vous voulez, je peux :
+- générer automatiquement une page détaillée pour chaque endpoint avec exemple curl et schémas Zod (extraction depuis `packages/api/src/modules/*/routes.ts`), ou
+- générer `openapi.yaml` complet à partir des routes sources pour import dans Postman/Swagger UI.
+
+Dites quelle sortie vous préférez et je la crée automatiquement.
+## Minimal OpenAPI / Swagger snippet
+
+Vous pouvez démarrer une description OpenAPI minimale pour générer une collection Postman ou une spec interactive :
+
+```yaml
+openapi: 3.0.3
+info:
+  title: Hullbay API
+  version: 1.0.0
+paths:
+  /api/auth/login:
+    post:
+      summary: Authentifier un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+
+```
+
+---
+
+## Conseils pratiques et troubleshooting
+
+- Pour reconstruire l'état désiré à partir de l'état réel : inspectez les labels Docker `bozando.*` (voir `concepts`).
+- Sur erreur `422`, consultez les logs du service `hullbay-backend` et le websocket d'événements pour la trace d'erreur.
+- Pour automatisation CI : stockez un `service account` avec MFA activée et une rotation régulière des tokens.
+
+---
+
+Si vous voulez, je peux générer automatiquement :
+- une spec OpenAPI complète à partir des routes du repo https://github.com/Fotetsa/hullbay, ou
+- une collection Postman compatible.
+
+Dites-moi ce que vous préférez et je continue.
+
+### Authentification et Garde MFA
+Chaque route sous `/api/*` exige un JWT Bearer, **sauf** les routes publiques d'amorçage et de connexion (`/api/auth/bootstrap`, `/api/auth/login`, etc.).
+
+:::warning Garde MFA non configurable
+Indépendamment du rôle (owner, operator, viewer), tout compte authentifié avec `mfaEnabled: false` reçoit un `403 Forbidden` sur chaque route, sauf celles dédiées à la configuration de la MFA (`/mfa/enroll`, `/mfa/confirm`) et à la vérification du statut (`/auth/me`).
+:::
+
+### Format des erreurs
+En cas d'échec de validation Zod, l'API renvoie un `400` structuré :
+```json
+{
+  "statusCode": 400,
+  "error": "Validation echouee",
+  "details": {
+    "email": ["Invalid email"],
+    "password": ["String must contain at least 8 character(s)"]
+  }
+}

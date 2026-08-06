@@ -1,133 +1,66 @@
 import type { SidebarsConfig } from '@docusaurus/plugin-content-docs';
 
 const sidebars: SidebarsConfig = {
-    tutorialSidebar: [
-        {
-            type: 'category',
-            label: 'INTRODUCTION',
-            collapsed: false, // Garder ouvert par défaut pour l'accueil
-            items: ['introduction/why-hullbay'],
-        },
-        {
-            type: 'category',
-            label: 'GETTING STARTED',
-            items: [
-                'getting-started/requirements',
-                'getting-started/quick-install',
-                'getting-started/local-development',
-                'getting-started/first-project',
-            ],
-        },
-        {
-            type: 'category',
-            label: 'CORE CONCEPTS',
-            items: [
-                'core-concepts/projects-nodes-edges',
-                {
-                    type: 'category',
-                    label: 'Node Types',
-                    items: [
-                        'core-concepts/node-types/container',
-                        'core-concepts/node-types/network',
-                        'core-concepts/node-types/volume',
-                        'core-concepts/node-types/gateway',
-                    ],
-                },
-                'core-concepts/connection-rules',
-                'core-concepts/docker-labels',
-                'core-concepts/reconciliation',
-                'core-concepts/auto-scaling',
-            ],
-        },
-        {
-            type: 'category',
-            label: 'GUIDES',
-            items: [
-                'guides/deploy-project',
-                'guides/expose-with-gateway',
-                'guides/manage-secrets',
-                'guides/manage-registries',
-                'guides/add-server',
-                'guides/delegate-access',
-                'guides/enable-mfa',
-                'guides/rebuild-from-docker',
-                'guides/prune-orphans',
-                'guides/troubleshooting',
-            ],
-        },
-        {
-            type: 'category',
-            label: 'SECURITY',
-            items: [
-                'security/overview',
-                'security/rbac',
-                'security/secrets-encryption',
-                'security/docker-socket-proxy',
-                'security/responsible-disclosure',
-            ],
-        },
-        {
-            type: 'category',
-            label: 'API REFERENCE',
-            items: [
-                'api/overview',
-                'api/authentication',
-                'api/projects',
-                'api/nodes-edges',
-                'api/reconciler',
-                'api/servers',
-                'api/registry',
-                'api/secrets',
-                'api/observability',
-                'api/audit-log',
-                'api/websocket-events',
-            ],
-        },
-        {
-            type: 'category',
-            label: 'ARCHITECTURE INTERNE (Dev)',
-            items: [
-                'internal/architecture',
-                'internal/canvas-internals',
-                'internal/design-system',
-                'internal/real-time-state',
-            ],
-        },
-        {
-            type: 'category',
-            label: 'CONTRIBUTING',
-            items: [
-                'contributing/setup',
-                'contributing/project-structure',
-                'contributing/coding-conventions',
-                'contributing/adding-node-type',
-                'contributing/testing',
-                'contributing/pull-requests',
-            ],
-        },
-        {
-            type: 'category',
-            label: 'ARCHITECTURE DECISIONS (ADR)',
-            items: [
-                'adrs/adr-001-swarm-vs-kubernetes',
-                'adrs/adr-002-docker-labels-as-truth',
-                'adrs/adr-003-docker-socket-proxy',
-                'adrs/adr-004-dnsrr-vs-vip',
-                'adrs/adr-005-postgres-as-cache',
-            ],
-        },
-        'changelog',
-        {
-            type: 'category',
-            label: 'FAQ',
-            items: [
-                'faq/general-questions',
-                'faq/installation-and-setup',
-                'faq/troubleshooting-errors',
-                'faq/security-and-compliance',
-            ],
-        },
-    ],
+  tutorialSidebar: [
+    // ─── 1. DÉCOUVERTE ───────────────────────────────────────────────
+    {
+      type: 'doc',
+      id: 'introduction/Pourquoi-hullbay',
+      label: 'Introduction',
+    },
+    {
+      type: 'category',
+      label: 'Démarrage',
+      collapsed: false,
+      items: [
+        { type: 'doc', id: 'getting-started/installation', label: 'Installation & Prérequis' },
+        { type: 'doc', id: 'getting-started/premier-projet', label: 'Créer votre premier projet' },
+      ],
+    },
+
+    // ─── 2. COMPRENDRE ───────────────────────────────────────────────
+    {
+      type: 'doc',
+      id: 'concepts',
+      label: 'Concepts Fondamentaux',
+    },
+
+    // ─── 3. AGIR (Guides pratiques) ──────────────────────────────────
+    {
+      type: 'category',
+      label: 'Guides',
+      items: [
+        { type: 'doc', id: 'guides/deploiement', label: 'Déployer un projet' },
+        { type: 'doc', id: 'guides/infrastructure', label: 'Infrastructure & Serveurs' },
+        { type: 'doc', id: 'guides/secrets-registry', label: 'Secrets & Registry' },
+        { type: 'doc', id: 'guides/depannage', label: 'Dépannage' },
+      ],
+    },
+
+    // ─── 4. SÉCURITÉ ─────────────────────────────────────────────────
+    {
+      type: 'category',
+      label: 'Sécurité',
+      items: [
+        { type: 'doc', id: 'security/security-overview', label: 'Vue d\'ensemble' },
+        { type: 'doc', id: 'security/rbac', label: 'RBAC & Permissions' },
+        { type: 'doc', id: 'security/secrets', label: 'Chiffrement & Secrets' },
+        { type: 'doc', id: 'security/docker-socket', label: 'Socket Docker' },
+      ],
+    },
+
+    // ─── 5. RÉFÉRENCE ────────────────────────────────────────────────
+    {
+      type: 'category',
+      label: 'Référence',
+      items: [
+        { type: 'doc', id: 'api/api-reference', label: 'API complète' },
+        { type: 'doc', id: 'faq/faq', label: 'FAQ' },
+        { type: 'doc', id: 'ads/changelog', label: 'Changelog' }, // ou 'release-notes'
+      ],
+    },
+
+  ],
 };
 
 export default sidebars;

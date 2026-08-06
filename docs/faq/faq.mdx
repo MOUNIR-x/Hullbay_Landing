@@ -1,0 +1,71 @@
+﻿---
+title: "Foire aux questions"
+sidebar_label: "FAQ"
+description: "Questions fréquentes sur Hullbay : comportements spécifiques, sécurité, déploiement et résolution des problèmes courants."
+---
+
+# Foire aux questions (FAQ)
+
+Cette page regroupe les questions les plus fréquentes et les comportements spécifiques de Hullbay identifiés lors de l'analyse du code source.
+
+---
+
+## 🏷️ 1. Généralités et Nommage
+
+### Pourquoi retrouve-t-on le nom "bozando" dans le code et les labels Docker ?
+Il s'agit d'un héritage technique. Le produit a été renommé en **Hullbay**, mais le code source (packages `@bozando-ops/*`), les labels Docker (`bozando.*`) et la base de données (`bozando_ops`) conservent l'ancien identifiant pour assurer la rétrocompatibilité et éviter une migration de données risquée.
+
+---
+
+##  2. Authentification et Sécurité
+
+### La MFA est-elle vraiment obligatoire ?
+**Oui, de manière stricte et non configurable.** Un middleware bloque **toutes** les routes authentifiées avec un code `403 Forbidden` si le compte a `mfaEnabled: false`. Seules les routes de configuration de la MFA et de vérification du statut contournent cette garde.
+
+### Que se passe-t-il si je perds ma clé `MFA_ENCRYPTION_KEY` ?
+Cette clé (stockée dans votre `.env`) chiffre les seeds TOTP, les tokens de registry et les clés SSH. Si vous la perdez, ces données deviennent mathématiquement indéchiffrables. Vous devrez réinitialiser la MFA de tous les utilisateurs et recréer manuellement les credentials de registry et les accès SSH.
+
+---
+
+## 🚀 3. Déploiement et Projets
+
+### Quelle est la différence cruciale entre `DELETE` et `DESTROY` sur un projet ?
+- `DELETE /api/projects/:id` : Supprime **uniquement l'état désiré** (le dessin dans la base de données).
+- `POST /api/projects/:id/destroy` : Détruit **les ressources Docker réelles** (conteneurs, réseaux) tout en conservant le dessin (statut `draft`).
+
+:::warning Danger de ressources orphelines
+Si vous faites un `DELETE` sur un projet déployé sans faire `DESTROY` d'abord, vous créerez des ressources "orphelines" dans Docker. Elles ne seront nettoyées que par une commande `POST /api/prune` manuelle.
+:::
+
+### Que signifie l'erreur `422 Unprocessable Entity` lors d'un déploiement ?
+Contrairement à une erreur `500` (inattendue), une `422` indique un **échec attendu et actionnable** (ex: image Docker indisponible, secret manquant). Le système annule automatiquement (rollback) tout ce qui a été créé pendant ce déploiement pour laisser le cluster stable.
+
+---
+
+## 🖥️ 4. Infrastructure et Serveurs
+
+### Pourquoi vois-je deux entrées "server.provisioned" dans le journal d'audit pour un seul serveur ?
+C'est un comportement réel du code actuel (bug connu). L'événement `server.provisioned` est émis **deux fois** : une première fois par le workflow interne (`provision-server.ts`) et une seconde fois par le callback de la route API (`servers/routes.ts`). Cela génère deux logs d'audit et deux notifications WebSocket pour une seule action.
+
+### Les métriques CPU (`avgCpuPct`) sont-elles fiables en cluster Swarm ?
+**Partiellement.** `avgCpuPct` ne reflète que les tâches tournant **localement** sur le nœud manager interrogé par l'API. Le proxy socket ne voit pas les conteneurs des nœuds distants. En revanche, le nombre de répliques et leur placement sont exacts à l'échelle du cluster.
+
+---
+
+## 🔑 5. Secrets et Registres
+
+### En tant qu'administrateur (`owner`), puis-je récupérer la valeur en clair d'un secret ?
+**Non.** Par conception de sécurité (modèle write-only), les secrets ne sont jamais retournés par l'API. La route `GET /api/secrets` ne renvoie que les identifiants et les noms.
+
+### Que se passe-t-il si j'essaie de supprimer un secret encore utilisé ?
+L'API renvoie une erreur `409 Conflict`. Docker refuse nativement la suppression d'un secret actif, et Hullbay propage cette erreur pour éviter de casser silencieusement un service en cours d'exécution.
+
+---
+
+##  6. Observabilité et Audit
+
+### Pourquoi l'activation de la MFA ou la commande "rebuild-from-docker" n'apparaissent-elles pas dans le journal d'audit ?
+Il s'agit de **code mort** identifié dans le dépôt. Bien que les événements `"mfa.enabled"` et `"rebuild.finished"` soient déclarés dans la carte de configuration `AUDITED`, le code source ne contient aucun appel à `eventBus.emit()` correspondant. Ces actions ne sont donc pas tracées dans le journal en l'état actuel.
+
+### Reçois-je toutes les notifications WebSocket, même celles des autres projets ?
+Cela dépend du payload. Si l'événement contient un `projectId` (ex: `deploy.finished`), il est routé uniquement vers la room de ce projet. Si l'événement **ne contient pas** de `projectId` (ex: `user.created`, `provision.step`), il est diffusé en **broadcast à TOUS les clients connectés**.

@@ -1,0 +1,42 @@
+﻿---
+title: "Protection du socket Docker"
+sidebar_label: "Socket Docker"
+description: "Architecture du proxy Docker filtré, permissions accordées et commandes bloquées pour sécuriser l'accès au démon Docker."
+---
+
+# Protection du socket Docker
+
+Le socket Docker (`/var/run/docker.sock`) est l'interface de communication Unix avec le démon Docker. **Monter ce socket dans un conteneur équivaut à donner un accès root complet** au serveur hôte. Hullbay adopte une architecture de sécurité stricte pour minimiser cette surface d'attaque.
+
+---
+
+## ⚠️ Le problème du socket Docker
+
+Si un attaquant parvient à exécuter du code dans un conteneur ayant accès au socket Docker, il peut :
+- Créer un conteneur **privilégié** avec montage du filesystem hôte (`/`).
+- **Exécuter des commandes arbitraires** (`docker exec`) dans n'importe quel autre conteneur.
+- **Lire les secrets** montés dans les conteneurs voisins.
+- **Arrêter ou supprimer** les conteneurs critiques de l'infrastructure.
+
+---
+
+## 🛡️ La solution : Docker Socket Proxy
+
+Hullbay n'expose **jamais** le socket Docker directement à son API. Il utilise l'image officielle **`tecnativa/docker-socket-proxy`** comme intermédiaire filtré.
+
+### Architecture
+
+```text
+┌──────────────────────┐       TCP (port 2375)       ┌──────────────────────┐
+│                      │  ─────────────────────────> │                      │
+│   Conteneur API      │                              │   Socket Proxy       │
+│   (Hullbay)          │  <─────────────────────────  │   (Tecnativa)        │
+│                      │                              │                      │
+└──────────────────────┘                              └─────────────────────┘
+                                                                 │ Unix Socket
+                                                                 │ (Lecture seule)
+                                                                 ▼
+                                                      ┌──────────────────────┐
+                                                      │   Docker Daemon      │
+                                                      │ (/var/run/docker.sock│
+                                                      └──────────────────────┘

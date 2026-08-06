@@ -1,0 +1,133 @@
+﻿---
+title: "Créer votre premier projet"
+sidebar_label: "Créer votre premier projet"
+description: "Tutoriel pas à pas pour concevoir, planifier et déployer votre première application avec l'interface visuelle de Hullbay."
+---
+
+# Créer votre premier projet
+
+Maintenant que Hullbay est installé et que votre compte **Owner** est configuré avec la MFA, vous êtes prêt à déployer votre première infrastructure. Ce guide vous accompagne dans la création d'une application web simple (un serveur Nginx) avec son réseau dédié et son exposition publique.
+
+---
+
+## 📁 1. Création du projet
+
+1. Depuis le tableau de bord principal, cliquez sur le bouton **"Nouveau Projet"**.
+2. Donnez un nom à votre projet (par exemple : `mon-site-web`).
+3. Hullbay générera automatiquement un `slug` unique (par exemple : `mon-site-web-a3f8`). Ce slug est crucial : il sert de préfixe à tous les labels Docker (`bozando.projectId=mon-site-web-a3f8`) pour isoler votre projet des autres.
+4. Cliquez sur **Créer**. Vous êtes maintenant sur le canvas visuel (le cœur de l'expérience Hullbay).
+
+---
+
+## 🎨 2. Conception sur le Canvas
+
+Le canvas représente l'**État Désiré** de votre infrastructure. Commençons par assembler les pièces.
+
+### Ajouter un Réseau
+1. Ouvrez la **Palette** (panneau latéral gauche).
+2. Glissez-déposez un nœud de type **Network** sur la zone de travail.
+3. Cliquez sur le nœud pour l'éditer et nommez-le `reseau-principal`.
+
+### Ajouter un Conteneur
+1. Glissez-déposez un nœud de type **Container** à côté du réseau.
+2. Nommez-le `web-server`.
+3. Dans le panneau d'inspection (à droite), configurez les propriétés :
+   - **Image** : `nginx:alpine`
+   - **Port** : `80`
+   - **Variables d'environnement** : *(laissez vide pour cet exemple)*
+
+### Ajouter une Passerelle (Gateway)
+1. Glissez-déposez un nœud de type **Gateway**.
+2. Nommez-le `expo-publique`.
+3. Configurez-le pour qu'il pointe vers le port `80` de votre `web-server`. Caddy gérera automatiquement le reverse proxy et, si un domaine est configuré, le certificat SSL.
+
+### Connecter les nœuds
+1. Cliquez sur le point de connexion (handle) du nœud `web-server` et tirez un trait vers `reseau-principal`.
+2. Faites de même entre `expo-publique` et `web-server`.
+3. Le système validera automatiquement la compatibilité des types et affichera des liens étiquetés `network` et `gateway`.
+
+:::info Validation en temps réel
+Les schémas de validation Zod (dans le package `@hullbay/shared`) vérifient chaque modification. Si vous tentez une connexion interdite (ex: relier un volume directement à une gateway), le canvas rejettera l'action immédiatement avec une notification d'erreur.
+:::
+
+---
+
+## 🔍 3. Planification du déploiement (Le "Plan")
+
+Hullbay ne déploie rien à l'aveugle. Il calcule d'abord la différence entre votre dessin (État Désiré) et le cluster Docker (État Réel).
+
+1. Cliquez sur le bouton **"Revoir et déployer"** en haut à droite du canvas.
+2. Une modale s'ouvre, affichant le **Plan d'actions** généré par le Réconcilier :
+   - 🟢 **Create** : `network mon-site-web-a3f8-reseau-principal`
+   - 🟢 **Create** : `service mon-site-web-a3f8-web-server`
+   - 🟢 **Create** : `route caddy pour mon-site-web-a3f8-expo-publique`
+3. Vérifiez que les actions correspondent à vos attentes. C'est votre dernière chance d'annuler avant l'exécution.
+4. Cliquez sur **"Confirmer le déploiement"**.
+
+**Commandes : Plan et déploiement (exemples API)**
+
+Si vous préférez automatiser ou reproduire le flux depuis un terminal, voici des exemples `curl` basiques.
+
+- Authentification (obtenir un JWT) :
+
+```bash
+curl -X POST https://your.hullbay.server/api/auth/login \
+   -H "Content-Type: application/json" \
+   -d '{"email":"owner@example.com","password":"votre-mot-de-passe"}'
+```
+
+Réponse attendue : objet JSON contenant `token`.
+
+- Récupérer le plan pour un projet :
+
+```bash
+curl -X GET "https://your.hullbay.server/api/projects/<PROJECT_ID>/plan" \
+   -H "Authorization: Bearer <JWT_TOKEN>"
+```
+
+- Confirmer et lancer le déploiement :
+
+```bash
+curl -X POST "https://your.hullbay.server/api/projects/<PROJECT_ID>/deploy" \
+   -H "Authorization: Bearer <JWT_TOKEN>" \
+   -H "Content-Type: application/json" \
+   -d '{"confirm":true}'
+```
+
+Remplacez `<PROJECT_ID>` et `<JWT_TOKEN>` par vos valeurs réelles.
+
+---
+
+## 🚀 4. Suivi de l'exécution
+
+Une fois confirmé, le panneau d'activité de déploiement s'ouvre en bas de l'écran :
+
+- Vous verrez les logs en temps réel de la création des ressources.
+- L'ordre d'exécution est strict et géré par le backend : les réseaux sont créés avant les conteneurs, et les routes Caddy en dernier, pour éviter les erreurs de dépendance.
+- Si tout se passe bien, le statut du projet passe à **Deployed** et les nœuds sur le canvas affichent un indicateur vert (état `running`).
+
+:::tip Rollback automatique en cas d'erreur
+Si vous aviez spécifié une image inexistante (ex: `nginx:inexistant`), le déploiement aurait échoué avec une erreur `422 Unprocessable Entity`. Hullbay aurait alors **automatiquement annulé (rollback)** la création du réseau et du service pour ne laisser aucune ressource orpheline dans votre cluster.
+:::
+
+---
+
+## 🧹 5. Nettoyage et cycle de vie
+
+Pour cet exercice, vous pouvez supprimer ce projet de test pour repartir à zéro. Il est crucial de comprendre la différence entre deux actions :
+
+- **Détruire (Destroy)** : Supprime **toutes les ressources Docker réelles** (conteneurs, réseaux, routes Caddy) dans l'ordre inverse du déploiement, mais **conserve votre dessin** en base de données (le statut repasse à `draft`). C'est l'action à utiliser pour arrêter un projet temporairement.
+- **Supprimer (Delete)** : Efface **uniquement le dessin** (l'état désiré en base de données). 
+
+:::warning Danger de ressources orphelines
+Si vous utilisez "Supprimer" sur un projet qui est encore en statut "Deployed", les conteneurs continueront de tourner dans Docker sans être gérés par Hullbay. Utilisez **toujours** "Détruire" en premier, puis "Supprimer" si vous voulez tout effacer définitivement.
+:::
+
+---
+
+## 🎯 Prochaines étapes
+
+Maintenant que vous maîtrisez le flux de base, explorez les guides avancés pour :
+- [Gérer les secrets chiffrés](/docs/guides/secrets-registry)
+- [Ajouter un nouveau serveur au cluster Swarm](/docs/guides/infrastructure)
+- [Comprendre la détection de dérive (Drift)](/docs/concepts)

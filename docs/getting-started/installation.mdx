@@ -1,0 +1,67 @@
+﻿---
+title: "Installation et prérequis"
+sidebar_label: "Installation & Prérequis"
+description: "Guide d'installation rapide et sécurisée de Hullbay sur un serveur Linux frais."
+---
+
+# Installation et prérequis
+
+Ce guide détaille la procédure pour déployer Hullbay sur un serveur VPS ou une machine physique fraîche. Le processus est conçu pour être **idempotent** : vous pouvez relancer le script d'installation sans risque de corrompre une installation existante.
+
+:::warning Prérequis système
+- Un serveur sous **Ubuntu 22.04+** ou **Debian 12+**.
+- Un utilisateur avec les privilèges `sudo`.
+- Les ports `80` et `443` ouverts (pour Caddy et Let's Encrypt).
+- **Minimum recommandé** : 2 vCPU, 4 Go de RAM.
+:::
+
+---
+
+## 🚀 Installation en une ligne de commande
+
+Le moyen le plus simple et le plus fiable d'installer Hullbay est d'utiliser le script d'amorçage officiel. Ce script s'occupe de tout : installation de Docker, initialisation de Swarm, génération des secrets et démarrage de la pile.
+
+Exécutez la commande suivante en tant que `root` ou avec `sudo` :
+
+```bash
+# Exemple d'exécution (remplacez l'URL si vous avez une copie locale du script):
+curl -fsSL https://install.hullbay.example/bootstrap.sh | sudo bash
+```
+
+**Commandes utiles et vérifications**
+
+Avant et après l'installation, ces commandes aident au suivi et au diagnostic :
+
+- Vérifier la version de Docker et s'assurer qu'il tourne :
+
+```bash
+docker --version
+sudo systemctl status docker
+```
+
+- Initialiser Docker Swarm (si le script ne l'a pas fait) :
+
+```bash
+sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
+```
+
+- Lister les services et conteneurs de la pile :
+
+```bash
+docker service ls
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+```
+
+- Afficher les labels Docker (utile pour reconstruire l'état désiré) :
+
+```bash
+docker inspect --format '{{json .Spec.Labels}}' <service_or_container_name>
+```
+
+- Prune (nettoyage) en toute sécurité — le système ignore les ressources `bozando.system=true` :
+
+```bash
+docker system prune --volumes
+```
+
+Note: remplacez `curl` + `bash` par une inspection locale du script avant exécution si vous préférez auditer chaque étape.

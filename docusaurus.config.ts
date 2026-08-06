@@ -40,7 +40,7 @@ const config: Config = {
       'classic',
       {
         docs: {
-          sidebarPath: './sidebars.ts',
+          sidebarPath: './sidebar.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -85,7 +85,7 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Tutorial',
+          label: 'Documentation',
         },
         {to: '/blog', label: 'Blog', position: 'left'},
         {

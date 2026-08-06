@@ -1,0 +1,75 @@
+﻿---
+title: "Pourquoi choisir Hullbay"
+sidebar_label: "Introduction"
+description: "Découvrez Hullbay, la plateforme PaaS visuelle et auto-hébergeable pour orchestrer Docker Swarm simplement, en toute sécurité et sans la complexité de Kubernetes."
+---
+
+# Pourquoi choisir Hullbay ?
+
+**Hullbay** est une plateforme **PaaS (Platform as a Service) open-source et auto-hébergeable** qui transforme la gestion d'infrastructure Docker Swarm en une expérience visuelle, sécurisée et déclarative.
+
+Inspiré par des outils de modélisation réseau comme GNS3, Hullbay vous permet de concevoir, revoir et déployer vos environnements conteneurisés directement depuis un canevas interactif, sans avoir à écrire des fichiers YAML complexes ou à maîtriser la courbe d'apprentissage abrupte de Kubernetes.
+
+---
+
+## 🎯 Le problème que nous résolvons
+
+Gérer une infrastructure Docker en production présente souvent un dilemme pour les petites et moyennes équipes :
+- **La CLI Docker** est puissante mais fastidieuse pour orchestrer des stacks complexes (réseaux overlay, volumes, secrets, routing Caddy).
+- **Kubernetes** est le standard de l'industrie, mais sa complexité opérationnelle (et son coût en ressources) est disproportionnée pour une équipe gérant quelques VPS.
+- **Les PaaS commerciaux** (Railway, Vercel, Heroku) sont simples, mais coûteux à grande échelle et vous font perdre le contrôle de vos données et de votre infrastructure.
+
+**Hullbay se situe exactement au milieu :** il offre la simplicité visuelle d'un PaaS commercial, la puissance de l'auto-hébergement, et s'intègre nativement à l'écosystème Docker Swarm que vous possédez déjà.
+
+---
+
+## ✨ Fonctionnalités phares
+
+### 🎨 Conception Visuelle (Style GNS3)
+Oubliez les fichiers `docker-compose.yml` à 500 lignes. Dessinez votre architecture en glissant-déposant des nœuds (**Conteneurs**, **Réseaux**, **Volumes**, **Passerelles Caddy**) et connectez-les visuellement. Le système valide la cohérence de votre graphe en temps réel.
+
+### 🛡️ Sécurité "Secure by Default"
+La sécurité n'est pas une option, elle est intégrée à chaque couche :
+- **MFA TOTP obligatoire** pour tous les comptes, avec garde middleware stricte.
+- **Proxy de Socket Docker filtré** (`tecnativa`) : l'API n'a jamais un accès root direct à l'hôte. Les commandes dangereuses (`EXEC`) sont bloquées.
+- **Secrets Write-Only** : les mots de passe et tokens sont chiffrés (AES-256-GCM) et ne sont jamais relisibles en clair via l'API.
+
+### 🔄 Réconciliation et Rollback Automatique
+Hullbay ne déploie pas à l'aveugle. Il génère un **plan d'exécution** (création, mise à jour, suppression) que vous devez valider. En cas d'erreur lors du déploiement (ex: image introuvable, secret manquant), le système effectue un **rollback automatique** pour laisser votre cluster dans un état stable.
+
+### 📊 Observabilité et Drift Detection
+Un job en arrière-plan compare en continu l'état réel de Docker à votre dessin. Si un conteneur crash ou est modifié manuellement via la CLI, Hullbay le détecte (**Drift**) et vous propose de corriger la dérive. De plus, en cas de perte de la base de données, Hullbay peut **reconstruire son état** à partir des labels Docker.
+
+---
+
+## 🧩 Pour qui est conçu Hullbay ?
+
+| Profil | Cas d'usage principal |
+| :--- | :--- |
+| **Développeurs Full-Stack** | Déployer rapidement des apps, bases de données et reverse proxies sans quitter le navigateur. |
+| **Équipes DevOps / SysAdmin** | Orchestrer un cluster Swarm multi-nœuds avec une interface centralisée, des rôles (RBAC) et un journal d'audit. |
+| **Hébergeurs / Freelances** | Offrir un environnement de déploiement visuel et sécurisé à vos clients sur vos propres serveurs. |
+
+---
+
+## 🏗️ Architecture en un coup d'œil
+
+Hullbay est construit comme un **monorepo TypeScript** moderne, performant et entièrement typé de bout en bout :
+
+- **Frontend (`@hullbay/web`)** : React 18, Vite, React Flow (pour le canvas), TanStack Query et le design system Medusa UI.
+- **Backend (`@hullbay/api`)** : Fastify, Prisma (PostgreSQL), Dockerode, SSH2, et Socket.io pour le temps réel.
+- **Partagé (`@hullbay/shared`)** : Schémas de validation Zod assurant que le frontend et le backend parlent exactement le même langage.
+
+:::info Note sur le nommage technique
+Bien que le produit s'appelle officiellement **Hullbay**, vous remarquerez que le code source, les labels Docker (`bozando.*`) et la base de données (`bozando_ops`) utilisent encore l'identifiant technique historique `bozando`. Ce choix a été fait pour garantir la stabilité, la rétrocompatibilité des déploiements existants et éviter les migrations de base de données risquées.
+:::
+
+---
+
+## 🚀 Prêt à commencer ?
+
+Si vous êtes convaincu, passons à la pratique ! Choisissez votre point d'entrée :
+
+- [**Installation rapide**](/docs/getting-started/installation) : Déployez Hullbay sur votre serveur Linux en 5 minutes.
+- [**Créer votre premier projet**](/docs/getting-started/premier-projet) : Un tutoriel guidé pour déployer votre première application.
+- [**Concepts fondamentaux**](/docs/concepts) : Comprenez le modèle de "double source de vérité" et le cycle de vie des déploiements.

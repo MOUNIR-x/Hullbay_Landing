@@ -1,9 +1,91 @@
 ﻿---
-id: Concepts
-title: Concepts
-sidebar_label: Concepts
+title: "Concepts fondamentaux"
+sidebar_label: "Concepts fondamentaux"
+description: "Architecture, principes de conception et modèle mental de la plateforme Hullbay."
 ---
 
-# Concepts
+# Concepts fondamentaux
 
-Rédigez votre contenu ici. Utilisez les admonitions :::info et :::tip pour structurer votre documentation.
+Pour maîtriser Hullbay, il est essentiel de comprendre le modèle mental sur lequel la plateforme est construite. Contrairement aux outils d'orchestration traditionnels, Hullbay adopte une approche **visuelle, déclarative et résiliente**.
+
+:::info Note sur le nommage technique
+Bien que le produit s'appelle **Hullbay**, vous trouverez des références à `bozando` dans les labels Docker, les variables d'environnement ou la base de données. Il s'agit de l'identifiant technique historique du projet, conservé pour assurer la stabilité et la rétrocompatibilité du système.
+:::
+
+---
+
+## 🏗️ Le modèle de la "Double Source de Vérité"
+
+Hullbay repose sur un principe architectural unique : la dissociation entre l'intention et la réalité, avec une capacité de réconciliation automatique.
+
+| Source | Rôle | Où ça vit ? |
+| :--- | :--- | :--- |
+| **État Désiré** (Desired State) | Ce que vous avez dessiné et configuré dans le canvas. C'est l'intention de déploiement. | Base de données PostgreSQL (tables `Project`, `Node`, `Edge`). |
+| **État Réel** (Runtime State) | Ce qui est effectivement en cours d'exécution sur le cluster. | Labels Docker (`bozando.projectId`, `bozando.nodeName`, `bozando.spec`). |
+
+:::tip La reconstruction (Rebuild)
+Parce que les labels Docker agissent comme une source de vérité redondante, Hullbay peut reconstruire intégralement son état désiré (la base de données) à partir de l'état réel du cluster via la fonction de reconstruction. La base de données est donc un "cache de confort" opérationnel, pas un point de défaillance unique.
+:::
+
+---
+
+## 🧩 Les 4 types de Nœuds (Nodes)
+
+Le canvas est composé de nœuds immuables dans leur type. Chaque type possède un schéma de validation Zod strict dans le package `@hullbay/shared`.
+
+1. **`container`** : Un service Docker. Il définit l'image, les variables d'environnement, les ressources (CPU/RAM) et les ports.
+2. **`network`** : Un réseau overlay Docker personnalisé. Il isole les communications entre les conteneurs d'un même projet.
+3. **`volume`** : Un volume de données persistant. Il est attaché à un conteneur pour conserver les données au-delà du cycle de vie du conteneur.
+4. **`gateway`** : Une route Caddy. Elle expose un service `container` à l'extérieur, gérant automatiquement le reverse proxy et les certificats SSL (Let's Encrypt).
+
+---
+
+## 🔗 La logique des Liaisons (Edges)
+
+Les liaisons définissent les relations entre les nœuds. Le système est conçu pour empêcher les configurations invalides :
+
+- Le `kind` d'une liaison (`network`, `volume`, ou `gateway`) est **inféré automatiquement** par le backend en fonction des types des nœuds source et cible.
+- Si vous tentez de connecter un `volume` directement à une `gateway`, le serveur rejettera la requête avec une erreur `400 Bad Request` avant même toute tentative d'écriture.
+- Les liaisons sont immuables dans leur source, cible et type. Seule leur configuration peut être mise à jour.
+
+---
+
+## 🔄 Le cycle de vie du Réconcilier (Reconciler)
+
+Le déploiement n'est pas une simple exécution de script. C'est un processus contrôlé en trois phases :
+
+1. **Planification (`GET /plan`)** : Le moteur compare l'État Désiré (BDD) à l'État Réel (Docker). Il génère un plan d'actions : `create`, `update`, `noop` (aucun changement) ou `remove`.
+2. **Validation** : L'utilisateur examine ce plan dans la modale "Revoir et déployer".
+3. **Exécution atomique (`POST /deploy`)** : 
+   - Un seul déploiement par projet est autorisé à la fois (`409 Conflict` sinon).
+   - En cas d'échec actionnable (erreur `422` : image manquante, secret absent), le système effectue un **rollback automatique** de tout ce qui a été créé pendant cette tentative, laissant le cluster dans un état stable.
+
+   ---
+
+   ## 🔎 Commandes & suivi (pratique)
+
+   Pour diagnostiquer l'état réel du cluster et suivre la correspondance avec l'état désiré, utilisez ces commandes :
+
+   - Lister les services et leurs labels :
+
+   ```bash
+   docker service ls --format "{{.ID}}\t{{.Name}}"
+   docker service inspect <SERVICE_ID> --format '{{json .Spec.Labels}}'
+   ```
+
+   - Inspecter un conteneur et ses labels runtime :
+
+   ```bash
+   docker ps --filter "name=<service_name>"
+   docker inspect <CONTAINER_ID> --format '{{json .Config.Labels}}'
+   ```
+
+   Les labels clefs incluent `bozando.projectId`, `bozando.nodeName`, `bozando.spec` et `bozando.system=true` pour les ressources système. Ces labels sont la source de vérité secondaire utilisée pour la reconstruction.
+
+---
+
+## 🛡️ Sécurité par conception (Secure by Default)
+
+- **Proxy de Socket Docker** : L'API ne communique jamais directement avec `/var/run/docker.sock`. Elle passe par un proxy `tecnativa/docker-socket-proxy` qui bloque explicitement les commandes `EXEC` et les accès bruts aux conteneurs, ne laissant passer que les opérations Swarm nécessaires.
+- **Immunisation du système** : Les conteneurs qui composent Hullbay lui-même sont étiquetés `bozando.system=true`. Le moteur de nettoyage (`prune`) est codé pour ignorer systématiquement ces ressources, empêchant tout auto-démantèlement accidentel.
+- **Chiffrement** : Les clés SSH de provisionnement et les tokens de registre sont chiffrés en **AES-256-GCM** au repos dans la base de données.

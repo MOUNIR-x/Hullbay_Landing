@@ -1,0 +1,116 @@
+﻿---
+title: "Contrôle d'accès basé sur les rôles"
+sidebar_label: "RBAC & Permissions"
+description: "Rôles owner, operator et viewer : permissions, garde MFA et bonnes pratiques de délégation."
+---
+
+# Contrôle d'accès basé sur les rôles (RBAC)
+
+Hullbay implémente un système de contrôle d'accès granulaire avec trois rôles distincts. Chaque route API est protégée par un middleware qui vérifie à la fois l'authentification (JWT valide) et l'autorisation (rôle suffisant).
+
+---
+
+## 👥 Les trois rôles
+
+### 🟢 Owner (Propriétaire)
+
+Le rôle `owner` dispose de tous les droits, y compris les opérations sensibles sur l'infrastructure.
+
+**Permissions exclusives :**
+- Gérer les utilisateurs (créer, modifier les rôles, supprimer)
+- Ajouter et retirer des serveurs du cluster Swarm
+- Gérer les credentials de registres Docker
+- Exécuter le nettoyage des ressources orphelines (`POST /api/prune`)
+- Modifier les paramètres système (domaine public)
+
+**Garde spéciale :** Seul le premier compte créé via `POST /api/auth/bootstrap` reçoit automatiquement le rôle `owner`. Les comptes créés ultérieurement ne peuvent pas être directement créés avec ce rôle.
+
+---
+
+###  Operator (Opérateur)
+
+Le rôle `operator` peut gérer les projets, les déploiements et les secrets, mais ne peut pas toucher à l'infrastructure sous-jacente.
+
+**Permissions :**
+- Créer, modifier et supprimer des projets
+- Déployer et détruire des projets
+- Gérer les nœuds et les liaisons sur le canvas
+- Créer et supprimer des secrets Docker
+- Consulter le journal d'audit
+- Consulter les ressources orphelines (lecture seule)
+
+**Limitations :**
+- Ne peut pas ajouter de serveurs
+- Ne peut pas gérer les registres Docker
+- Ne peut pas exécuter le prune (suppression effective)
+
+---
+
+### 🔵 Viewer (Lecteur)
+
+Le rôle `viewer` a un accès en lecture seule, idéal pour l'observabilité et le monitoring.
+
+**Permissions :**
+- Consulter les projets et leur état
+- Accéder aux métriques et à l'observabilité (`GET /api/health/cluster`, `GET /api/drift`)
+- Consulter le placement des tâches
+
+**Limitations :**
+- Aucune action destructive ou modificatrice
+- Ne peut pas créer de projets ni déployer
+
+---
+
+## 🔐 La garde MFA obligatoire
+
+Indépendamment du rôle, **tout compte authentifié avec `mfaEnabled: false` reçoit un `403 Forbidden`** sur chaque route authentifiée, sauf :
+- `/api/auth/mfa/enroll`
+- `/api/auth/mfa/confirm`
+- `/api/auth/me`
+
+Ce middleware est **non configurable** et s'applique avant toute vérification de rôle. Cela garantit qu'aucun utilisateur ne peut contourner la MFA, même temporairement.
+
+---
+
+## 📊 Matrice des permissions
+
+| Action | Owner | Operator | Viewer |
+| :--- | :---: | :---: | :---: |
+| Créer un projet | ✅ | ✅ | ❌ |
+| Déployer un projet | ✅ | ✅ |  |
+| Détruire un projet | ✅ | ✅ | ❌ |
+| Gérer les secrets | ✅ | ✅ | ❌ |
+| Ajouter un serveur | ✅ | ❌ | ❌ |
+| Gérer les registres | ✅ | ❌ | ❌ |
+| Exécuter le prune | ✅ | ❌ | ❌ |
+| Gérer les utilisateurs | ✅ | ❌ | ❌ |
+| Consulter l'audit | ✅ | ✅ | ❌ |
+| Consulter les métriques | ✅ | ✅ | ✅ |
+| Consulter le drift | ✅ | ✅ | ✅ |
+
+---
+
+## ️ Garde-fous critiques
+
+### Protection du dernier owner
+
+Le système empêche toute action qui laisserait le système sans owner :
+- **Impossible de rétrograder** le dernier owner en operator ou viewer (`400 Bad Request`).
+- **Impossible de supprimer** son propre compte si on est le dernier owner.
+- **Impossible de supprimer** le dernier owner restant.
+
+Ces gardes sont implémentées côté API et renvoyées avec des messages d'erreur explicites.
+
+---
+
+## 🔄 Gestion des utilisateurs
+
+### Créer un compte délégué
+
+```bash
+POST /api/users
+{
+  "email": "operator@entreprise.com",
+  "password": "mot-de-passe-temporaire",
+  "role": "operator"
+}
