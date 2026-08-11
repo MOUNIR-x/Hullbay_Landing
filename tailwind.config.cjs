@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: "class",
   presets: [require("@medusajs/ui-preset")],
   content: [
     "./index.html",

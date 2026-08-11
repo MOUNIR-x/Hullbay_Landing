@@ -1,16 +1,11 @@
-﻿---
-title: "Infrastructure et serveurs"
-sidebar_label: "Infrastructure & Serveurs"
-description: "Guide complet pour ajouter des serveurs, gérer un cluster Docker Swarm et comprendre l'architecture de sécurité de Hullbay."
----
-
+﻿
 # Infrastructure et serveurs
 
 Hullbay est conçu pour fonctionner sur un serveur unique ou un cluster Docker Swarm multi-nœuds. Ce guide détaille comment étendre votre infrastructure en ajoutant des serveurs et comment Hullbay sécurise les communications avec le démon Docker.
 
 ---
 
-## 🖥️ 1. Architecture du cluster Swarm
+## 1. Architecture du cluster Swarm
 
 Docker Swarm est le moteur d'orchestration sous-jacent de Hullbay. Il permet de répartir les charges de travail sur plusieurs machines physiques ou virtuelles.
 
@@ -22,28 +17,28 @@ Docker Swarm est le moteur d'orchestration sous-jacent de Hullbay. Il permet de 
 | **Worker** | Exécute les conteneurs assignés par les managers. | Autant que nécessaire pour la charge. |
 
 :::info Premier serveur = Manager
-Lors de l'installation initiale, le premier serveur est automatiquement initialisé comme **Manager** du cluster Swarm. Les serveurs ajoutés ultérieurement sont par défaut des **Workers**, sauf si vous spécifiez explicitement le rôle `manager`.
+Lors de l'installation initiale, le premier serveur est automatiquement initialisé comme **Manager** du cluster Swarm. Les serveurs ajoutés ultérieurement sont par défaut des **Workers**, sauf si vous spécifiez explicitement le rôle manager.
 :::
 
 ---
 
-## 🔌 2. Ajouter un serveur via SSH
+## 2. Ajouter un serveur via SSH
 
 Le provisioning de nouveaux serveurs se fait de manière sécurisée via SSH. Hullbay génère une paire de clés éphémère pour chaque opération.
 
 ### Procédure
 
-1. Accédez à la section **"Serveurs"** dans le menu latéral (réservé au rôle `owner`).
+1. Accédez à la section **"Serveurs"** dans le menu latéral (réservé au rôle owner).
 2. Cliquez sur **"Ajouter un serveur"**.
 3. Renseignez les informations :
-   - **Nom** : Identifiant lisible (ex: `worker-france-01`)
+   - **Nom** : Identifiant lisible (ex: worker-france-01)
    - **Hôte** : Adresse IP ou nom de domaine du serveur
    - **Port** : Port SSH (défaut : 22)
-   - **Utilisateur** : Utilisateur SSH (défaut : `root`)
-   - **Rôle** : `manager` ou `worker`
+   - **Utilisateur** : Utilisateur SSH (défaut : root)
+   - **Rôle** : manager ou worker
    - **Credential** : Clé privée SSH ou mot de passe
 
-4. Cliquez sur **"Provisionner"**. La réponse est immédiate (`202 Accepted`) car le provisioning s'exécute en arrière-plan.
+4. Cliquez sur **"Provisionner"**. La réponse est immédiate (202 Accepted) car le provisioning s'exécute en arrière-plan.
 
 ### Que se passe-t-il en arrière-plan ?
 
@@ -54,14 +49,14 @@ Le provisioning de nouveaux serveurs se fait de manière sécurisée via SSH. Hu
 5. Les credentials utilisateur (mot de passe ou clé personnelle) sont **immédiatement oubliés** — jamais persistés ni journalisés.
 
 :::warning Sécurité critique
-Les clés SSH de l'outil sont chiffrées au repos. Leur perte (si vous perdez `MFA_ENCRYPTION_KEY` dans votre `.env`) rend les serveurs ingérables. **Sauvegardez ce fichier hors du serveur.**
+Les clés SSH de l'outil sont chiffrées au repos. Leur perte (si vous perdez MFA_ENCRYPTION_KEY dans votre .env) rend les serveurs ingérables. **Sauvegardez ce fichier hors du serveur.**
 :::
 
 ---
 
-## 🛡️ 3. Le Docker Socket Proxy (Sécurité)
+## 3. Le Docker Socket Proxy (Sécurité)
 
-L'une des décisions architecturales les plus importantes de Hullbay est de **ne jamais monter directement le socket Docker** (`/var/run/docker.sock`) dans le conteneur API.
+L'une des décisions architecturales les plus importantes de Hullbay est de **ne jamais monter directement le socket Docker** (/var/run/docker.sock) dans le conteneur API.
 
 ### Pourquoi ?
 
@@ -69,14 +64,12 @@ Monter le socket Docker équivaut à donner un accès **root complet** sur le se
 
 ### La solution : Tecnativa Docker Socket Proxy
 
-Hullbay utilise l'image `tecnativa/docker-socket-proxy` comme intermédiaire filtré entre l'API et le socket Docker. Ce proxy expose uniquement les endpoints API Docker nécessaires :
+Hullbay utilise l'image tecnativa/docker-socket-proxy comme intermédiaire filtré entre l'API et le socket Docker. Ce proxy expose uniquement les endpoints API Docker nécessaires :
 
 | Endpoint | Autorisé | Usage |
 | :--- | :--- | :--- |
-| `SERVICES`, `TASKS`, `NODES` | ✅ | Orchestration Swarm |
-| `NETWORKS`, `VOLUMES`, `IMAGES` | ✅ | Gestion des ressources |
-| `SECRETS` | ✅ | Gestion des secrets Docker |
-| `EXEC` | ❌ **BLOQUÉ** | Empêche l'exécution de commandes arbitraires |
-| `CONTAINERS` (écritures brutes) | ❌ **BLOQUÉ** | Empêche la manipulation directe de conteneurs |
-
-### Configuration dans docker
+| SERVICES, TASKS, NODES | **Ouvert** | Orchestration Swarm |
+| NETWORKS, VOLUMES, IMAGES | **Ouvert** | Gestion des ressources |
+| SECRETS | **Ouvert** | Gestion des secrets Docker |
+| EXEC | **BLOQUÉ** | Empêche l'exécution de commandes arbitraires |
+| CONTAINERS (écritures brutes) | **BLOQUÉ** | Empêche la manipulation directe de conteneurs |
