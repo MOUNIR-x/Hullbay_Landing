@@ -66,38 +66,7 @@ const config: Config = {
         },
       ],
     },
-    footer: {
-      style: 'dark',
-      links: [
-        {
-          title: 'Documentation',
-          items: [
-            {
-              label: 'Installation',
-              to: '/docs/getting-started/installation',
-            },
-            {
-              label: 'Concepts',
-              to: '/docs/Concepts',
-            },
-          ],
-        },
-        {
-          title: 'Projet',
-          items: [
-            {
-              label: 'GitHub',
-              href: 'https://github.com/Fotetsa/hullbay',
-            },
-            {
-              label: 'hullbay.dev',
-              href: 'https://hullbay.dev',
-            },
-          ],
-        },
-      ],
-      copyright: `Copyright © ${new Date().getFullYear()} Fotetsa — Hullbay. MIT License.`,
-    },
+    
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,

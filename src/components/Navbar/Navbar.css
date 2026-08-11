@@ -1,0 +1,149 @@
+ .header-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    background-color: #d9d9d9;
+    border-bottom: 2px solid #111111;
+    color: #111111;
+    font-family: serif, sans-serif;
+  }
+  .main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #111111;
+  }
+  
+  .logo-icon {
+    background-color: #000000;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .logo-icon img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+  }
+  
+  .logo-text {
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+  }
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+  
+  .nav-link {
+    color: #333333;
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+  
+  .nav-link:hover {
+    color: #000000;
+    font-weight: bold;
+  }
+  .right-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .github-btn {
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    color: #111111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: background-color 0.2s;
+  }
+  
+  .github-btn:hover {
+    background-color: #e5e5e5;
+  }
+  .btn-contribuer {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+  }
+  
+  .btn-contribuer:hover {
+    opacity: 0.85;
+  }
+  
+  .menu-mobile-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #111111;
+    padding: 8px;
+  }
+  .mobile-dropdown {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background-color: #d9d9d9;
+    border-top: 1px solid #bbbbbb;
+    padding: 20px;
+  }
+  
+  .mobile-link {
+    color: #111111;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  
+  .mobile-btn-contribuer {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  @media (max-width: 768px) {
+    .nav-menu {
+      display: none;
+    }
+  
+    .btn-contribuer {
+      display: none;
+    }
+  
+    .menu-mobile-btn {
+      display: block;
+    }
+  }

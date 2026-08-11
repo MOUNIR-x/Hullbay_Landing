@@ -1,0 +1,113 @@
+@keyframes zoomIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  .cta-section {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 60px 24px 100px 24px;
+    background-color: #ffffff;
+    color: #111111;
+    font-family: serif, sans-serif;
+  }
+  
+  .cta-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .cta-card {
+    width: 100%;
+    background-color: #e5e2e2;
+    border-radius: 32px;
+    padding: 80px 30px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: zoomIn 0.8s ease-out forwards;
+    transition: transform 0.3s ease;
+  }
+  
+  .cta-card:hover {
+    transform: translateY(-2px);
+  }
+  .cta-title {
+    font-size: 48px;
+    font-weight: 400;
+    color: #111111;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+  .cta-desc {
+    font-size: 16px;
+    color: #444444;
+    margin-bottom: 36px;
+    max-width: 600px;
+    line-height: 1.5;
+  }
+  .cta-btn-group {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .btn-black {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 400;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  }.btn-black:hover {
+    background-color: #1a1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  @media (max-width: 1024px) {
+    .cta-card {
+      padding: 60px 24px;
+      border-radius: 24px;
+    }
+  
+    .cta-title {
+      font-size: 38px;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .cta-section {
+      padding: 40px 16px 60px 16px;
+    }
+  
+    .cta-card {
+      padding: 40px 16px;
+      border-radius: 20px;
+    }
+  
+    .cta-title {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+  
+    .cta-desc {
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+  
+    .btn-black {
+      width: 100%;
+      padding: 14px 20px;
+      font-size: 15px;
+    }
+  }

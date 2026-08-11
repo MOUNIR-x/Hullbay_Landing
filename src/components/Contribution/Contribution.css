@@ -1,0 +1,115 @@
+ @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .section-contrib {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 80px 24px 120px 24px;
+    background-color: #ffffff;
+    color: #111111;
+    font-family: serif, sans-serif;
+  }
+  .contrib-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+  .contrib-text-box {
+    flex: 1;
+    max-width: 600px;
+  }
+  
+  .small-tag {
+    display: block;
+    font-size: 42px;
+    font-weight: 400;
+    color: #111111;
+    margin-bottom: 20px;
+    line-height: 1.1;
+  }
+  
+  .main-title {
+    font-size: 22px;
+    font-weight: 500;
+    color: #111111;
+    margin-bottom: 12px;
+  }
+  
+  .desc-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #555555;
+    margin: 0;
+    max-width: 500px;
+  }
+  .contrib-btn-box {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }.btn-github-grey {
+    background-color: #dedede;
+    color: #111111;
+    padding: 16px 36px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 400;
+    text-decoration: none;
+    display: inline-block;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .btn-github-grey:hover {
+    background-color: #cfcfcf;
+    transform: translateY(-2px);
+  }
+  @media (max-width: 900px) {
+    .contrib-container {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 32px;
+    }
+  
+    .small-tag {
+      font-size: 32px;
+    }
+  
+    .contrib-btn-box {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+  
+  @media (max-width: 640px) {
+    .section-contrib {
+      padding: 50px 20px 80px 20px;
+    }
+  
+    .small-tag {
+      font-size: 28px;
+    }
+  
+    .main-title {
+      font-size: 18px;
+    }
+  
+    .desc-text {
+      font-size: 13px;
+    }
+  
+    .btn-github-grey {
+      width: 100%;
+      text-align: center;
+      font-size: 16px;
+      padding: 14px 20px;
+    }
+  }
