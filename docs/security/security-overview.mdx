@@ -1,16 +1,11 @@
-﻿---
-title: "Vue d'ensemble de la sécurité"
-sidebar_label: "Vue d'ensemble"
-description: "Principes de sécurité, surface de risque et architecture de défense en profondeur de Hullbay."
----
-
+﻿
 # Vue d'ensemble de la sécurité
 
 Hullbay pilote un cluster Docker Swarm, ce qui signifie que l'accès au démon Docker équivaut à un contrôle **root** sur les serveurs du cluster. La sécurité n'est pas une option : elle est intégrée à chaque couche de l'architecture, de l'authentification à la gestion des secrets en passant par l'isolation du socket Docker.
 
 ---
 
-## 🛡️ Principes de conception
+## Principes de conception
 
 ### 1. Défense en profondeur
 
@@ -24,39 +19,39 @@ Aucune mesure unique ne suffit à protéger un système d'orchestration. Hullbay
 
 ### 2. Secure by Default
 
-- La MFA est **obligatoire** dès la première connexion. Aucune route authentifiée n'est accessible tant que `mfaEnabled` n'est pas `true`.
-- Les secrets sont **write-only** : leur valeur n'est jamais retournée par l'API, même au rôle `owner`.
+- La MFA est **obligatoire** dès la première connexion. Aucune route authentifiée n'est accessible tant que **mfaEnabled** n'est pas **true**.
+- Les secrets sont **write-only** : leur valeur n'est jamais retournée par l'API, même au rôle owner.
 - Les logs applicatifs **censurent automatiquement** les credentials, tokens et valeurs de secrets.
 
 ### 3. Principe du moindre privilège
 
 Chaque composant ne reçoit que les permissions strictement nécessaires :
-- L'API ne peut pas exécuter de commandes arbitraires dans les conteneurs (`EXEC` bloqué).
-- Les `operator` ne peuvent pas gérer les serveurs physiques (réservé aux `owner`).
-- Les `viewer` ont un accès en lecture seule à l'observabilité.
+- L'API ne peut pas exécuter de commandes arbitraires dans les conteneurs (EXEC bloqué).
+- Les operator ne peuvent pas gérer les serveurs physiques (réservé aux owner).
+- Les viewer ont un accès en lecture seule à l'observabilité.
 
 ---
 
-## 🎯 Surface de risque
+## Surface de risque
 
 | Composant | Risque | Mesure de mitigation |
 | :--- | :--- | :--- |
-| **Socket Docker** | Accès root complet au serveur | Proxy `tecnativa/docker-socket-proxy` avec filtrage strict |
+| **Socket Docker** | Accès root complet au serveur | Proxy tecnativa/docker-socket-proxy avec filtrage strict |
 | **Base de données** | Fuite de secrets chiffrés | Chiffrement AES-256-GCM + clés maîtresses externalisées |
 | **SSH (provisioning)** | Interception de clés | Clés éphémères en mémoire, jamais persistées ni journalisées |
 | **JWT / Sessions** | Vol de token | Audiences séparées (session vs mfa-pending), expiration courte |
-| **MFA** | Contournement | Garde middleware bloquant toutes les routes si `mfaEnabled: false` |
+| **MFA** | Contournement | Garde middleware bloquant toutes les routes si mfaEnabled: false |
 
 ---
 
-## 🔑 Clés maîtresses
+## Clés maîtresses
 
 Deux secrets maîtres protègent l'ensemble du système. Ils sont générés **une seule fois** lors de l'installation et ne doivent **jamais** être modifiés après mise en service.
 
 | Clé | Rôle | Stockage |
 | :--- | :--- | :--- |
-| `JWT_SECRET` | Signe les tokens de session et MFA | Fichier `.env` (hors du serveur) |
-| `MFA_ENCRYPTION_KEY` | Chiffre les secrets TOTP, tokens registry, clés SSH | Fichier `.env` (hors du serveur) |
+| JWT_SECRET | Signe les tokens de session et MFA | Fichier .env (hors du serveur) |
+| MFA_ENCRYPTION_KEY | Chiffre les secrets TOTP, tokens registry, clés SSH | Fichier .env (hors du serveur) |
 
 :::danger Conséquence de la perte
 La perte de ces clés rend :
@@ -64,7 +59,7 @@ La perte de ces clés rend :
 - Tous les secrets chiffrés indéchiffrables (MFA, tokens registry, clés SSH)
 - Le système partiellement inutilisable jusqu'à réinitialisation manuelle
 
-**Sauvegardez impérativement votre fichier `.env` dans un gestionnaire de mots de passe sécurisé.**
+**Sauvegardez impérativement votre fichier .env dans un gestionnaire de mots de passe sécurisé.**
 :::
 
 ---
@@ -81,8 +76,8 @@ La sécurité de la communauté dépend de la discrétion et de la collaboration
 
 ---
 
-## 🚀 Prochaines étapes
+## Prochaines étapes
 
-- [Contrôle d'accès basé sur les rôles (RBAC)](/docs/security/rbac)
-- [Chiffrement et gestion des secrets](/docs/security/secrets)
-- [Protection du socket Docker](/docs/security/docker-socket)
+- [Contrôle d'accès basé sur les rôles (RBAC)](#security/rbac)
+- [Chiffrement et gestion des secrets](#security/secrets)
+- [Protection du socket Docker](#security/docker-socket)

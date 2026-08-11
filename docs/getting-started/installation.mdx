@@ -1,67 +1,138 @@
-﻿---
-title: "Installation et prérequis"
-sidebar_label: "Installation & Prérequis"
-description: "Guide d'installation rapide et sécurisée de Hullbay sur un serveur Linux frais."
----
-
+﻿
 # Installation et prérequis
 
-Ce guide détaille la procédure pour déployer Hullbay sur un serveur VPS ou une machine physique fraîche. Le processus est conçu pour être **idempotent** : vous pouvez relancer le script d'installation sans risque de corrompre une installation existante.
+Ce guide décrit comment déployer **Hullbay** sur un serveur VPS ou une machine physique fraîche. L'installation est **idempotente** : vous pouvez relancer le script sans risquer de corrompre une instance existante.
 
 :::warning Prérequis système
-- Un serveur sous **Ubuntu 22.04+** ou **Debian 12+**.
-- Un utilisateur avec les privilèges `sudo`.
-- Les ports `80` et `443` ouverts (pour Caddy et Let's Encrypt).
-- **Minimum recommandé** : 2 vCPU, 4 Go de RAM.
+- Un serveur sous **Ubuntu 22.04+** ou **Debian 12+**
+- Un utilisateur avec les privilèges sudo (ou accès root)
+- Les ports **80** et **443** ouverts (Caddy + Let's Encrypt)
+- **Minimum recommandé** : 2 vCPU, 4 Go de RAM
+- Accès réseau sortant (téléchargement Docker, images GHCR, certificats TLS)
 :::
 
 ---
 
-## 🚀 Installation en une ligne de commande
+## Installation en une ligne de commande
 
-Le moyen le plus simple et le plus fiable d'installer Hullbay est d'utiliser le script d'amorçage officiel. Ce script s'occupe de tout : installation de Docker, initialisation de Swarm, génération des secrets et démarrage de la pile.
+Le moyen le plus simple d'installer Hullbay est le script officiel [`install.sh`](https://github.com/Fotetsa/hullbay/blob/master/install.sh). Il s'occupe de :
 
-Exécutez la commande suivante en tant que `root` ou avec `sudo` :
+1. Installer **Docker** (via get.docker.com) si absent
+2. Initialiser **Docker Swarm** si le nœud n'est pas déjà en mode Swarm
+3. Créer le réseau overlay **`boz_system`** (partagé entre Caddy et les services exposés)
+4. Préparer le dossier d'installation (défaut : `/opt/hullbay`)
+5. Télécharger `docker-compose.prod.yml` et le `Caddyfile`
+6. Générer le fichier **`.env`** (secrets JWT, MFA, PostgreSQL…) — créé une seule fois, jamais écrasé
+7. Démarrer la pile : PostgreSQL, Redis, socket-proxy, API, Web et Caddy
+
+Exécutez la commande suivante en tant que root ou avec **sudo** :
 
 ```bash
-# Exemple d'exécution (remplacez l'URL si vous avez une copie locale du script):
-curl -fsSL https://install.hullbay.example/bootstrap.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh | sudo bash
 ```
 
-**Commandes utiles et vérifications**
-
-Avant et après l'installation, ces commandes aident au suivi et au diagnostic :
-
-- Vérifier la version de Docker et s'assurer qu'il tourne :
+:::tip Audit du script
+Pour inspecter le script avant exécution :
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh -o install.sh
+less install.sh
+sudo bash install.sh
+```
+:::
+
+---
+
+## Variables d'environnement (optionnelles)
+
+Vous pouvez personnaliser l'installation en exportant ces variables **avant** de lancer le script :
+
+| Variable | Défaut | Description |
+| :--- | :--- | :--- |
+| GHCR_OWNER | fotetsa | Propriétaire des images sur GitHub Container Registry |
+| IMAGE_TAG | latest | Tag des images Docker (ghcr.io/<owner>/hullbay/api et /web) |
+| PUBLIC_HOST | *(vide)* | Domaine public pour HTTPS automatique via Let's Encrypt (ex. ops.example.com) |
+| INSTALL_DIR | /opt/hullbay | Dossier d'installation sur le serveur |
+
+Exemple avec un domaine personnalisé :
+
+```bash
+export PUBLIC_HOST=ops.mon-domaine.fr
+curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh | sudo bash
+```
+
+Sans `PUBLIC_HOST`, Hullbay est accessible en **HTTP** sur l'adresse IP du serveur (port 80).
+
+---
+
+## Première connexion et bootstrap
+
+Une fois l'installation terminée, le script affiche l'URL d'accès :
+
+- Avec domaine : `https://<PUBLIC_HOST>`
+- Sans domaine : `http://<IP-du-serveur>`
+
+### Créer le compte propriétaire
+
+Au premier lancement, créez le compte **Owner** via l'endpoint de bootstrap :
+
+```bash
+curl -X POST "https://ops.mon-domaine.fr/api/auth/bootstrap" \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"votre-mot-de-passe-securise"}'
+```
+
+Remplacez l'URL par celle affichée à la fin de l'installation.
+
+:::warning Sécurité
+Activez la **MFA (TOTP)** dans les paramètres du compte **avant** d'exposer Hullbay sur Internet. L'authentification à deux facteurs est une exigence de sécurité du produit.
+:::
+
+---
+
+## Services déployés
+
+La pile de production (`docker-compose.prod.yml`) comprend :
+
+| Service | Rôle |
+| :--- | :--- |
+| **postgres** | Base de données PostgreSQL 16 (cache opérationnel, audit, canvas) |
+| **redis** | Cache et files d'attente |
+| **socket-proxy** | Proxy filtré Tecnativa entre l'API et le socket Docker |
+| **api** | Backend Fastify — orchestration Swarm, RBAC, secrets, WebSocket |
+| **web** | Interface React (canvas visuel, déploiements, monitoring) |
+| **caddy** | Reverse proxy, TLS automatique, routage vers l'API et le frontend |
+
+Tous les conteneurs système portent le label `bozando.system=true` : ils ne peuvent pas être supprimés par les opérations de nettoyage ou de déploiement depuis le canvas.
+
+---
+
+## Vérifications post-installation
+
+```bash
+# Docker et Swarm
 docker --version
-sudo systemctl status docker
+docker info --format '{{.Swarm.LocalNodeState}}'
+
+# Services de la pile Hullbay
+cd /opt/hullbay
+docker compose ps
+
+# Réseau overlay système
+docker network inspect boz_system
 ```
 
-- Initialiser Docker Swarm (si le script ne l'a pas fait) :
+Si tous les conteneurs sont `running` et que l'URL s'ouvre dans le navigateur, passez au guide [Créer votre premier projet](#getting-started/premier-projet).
 
-```bash
-sudo docker swarm init --advertise-addr $(hostname -I | awk '{print $1}')
-```
+---
 
-- Lister les services et conteneurs de la pile :
+## Dépannage rapide
 
-```bash
-docker service ls
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
-```
+| Problème | Piste de résolution |
+| :--- | :--- |
+| Script échoue sur Docker Compose | Mettre à jour Docker (Compose v2 requis : docker compose version) |
+| Port 80/443 déjà utilisé | Libérer les ports ou arrêter le service conflictuel (nginx, apache2…) |
+| HTTPS ne fonctionne pas | Vérifier que PUBLIC_HOST pointe vers l'IP du serveur et que le port 443 est ouvert |
+| .env existant conservé | Normal — le script ne régénère jamais les secrets d'une install existante |
 
-- Afficher les labels Docker (utile pour reconstruire l'état désiré) :
-
-```bash
-docker inspect --format '{{json .Spec.Labels}}' <service_or_container_name>
-```
-
-- Prune (nettoyage) en toute sécurité — le système ignore les ressources `bozando.system=true` :
-
-```bash
-docker system prune --volumes
-```
-
-Note: remplacez `curl` + `bash` par une inspection locale du script avant exécution si vous préférez auditer chaque étape.
+Pour plus de détails, consultez le guide [Dépannage](#guides/depannage).

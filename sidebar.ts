@@ -21,7 +21,7 @@ const sidebars: SidebarsConfig = {
     // ─── 2. COMPRENDRE ───────────────────────────────────────────────
     {
       type: 'doc',
-      id: 'concepts',
+      id: 'Concepts',
       label: 'Concepts Fondamentaux',
     },
 

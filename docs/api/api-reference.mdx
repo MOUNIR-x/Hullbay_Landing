@@ -1,16 +1,10 @@
-﻿---
-title: "Référence API complète"
-sidebar_label: "API complète"
-description: "Documentation technique route par route de l'API Hullbay : authentification, projets, réconciliation, infrastructure, observabilité et WebSockets."
----
-
+﻿
 # Référence API complète
 
 Cette page documente l'intégralité de l'API REST et WebSocket de Hullbay. L'API est construite avec **Fastify** et utilise **Zod** pour la validation stricte des schémas de requêtes et de réponses.
 
-:::info Note sur le nommage technique
 Bien que le produit s'appelle **Hullbay**, le code source interne utilise encore l'identifiant technique `bozando` (ex: labels Docker `bozando.*`, base de données `bozando_ops`). Les extraits de code ci-dessous reflètent fidèlement le dépôt réel.
-:::
+
 
 ---
 
@@ -53,7 +47,7 @@ Remplacez `<PROJECT_ID>` et `<JWT_TOKEN>` par vos valeurs réelles.
 
 ## Principes communs
 
-- **Validation** : toutes les requêtes sont validées via `zod`. Les erreurs de validation retournent un `400` avec le champ `details` (voir ci-dessous).
+- **Validation** : toutes les requêtes sont validées via **Zod**. Les erreurs de validation retournent un **400** avec le champ **details** (voir ci-dessous).
 - **Authentification** : JWT Bearer dans l'en-tête `Authorization: Bearer <token>`.
 - **Content-Type** : `application/json` pour les corps JSON.
 - **Pagination** : les listes acceptent souvent `?page=` et `?perPage=` et retournent des métadonnées `{ total, page, perPage }`.
@@ -82,11 +76,13 @@ Remplacez `<PROJECT_ID>` et `<JWT_TOKEN>` par vos valeurs réelles.
 }
 ```
 
-- Erreurs courantes : `400` (validation), `401` (identifiants invalides)
+- Erreurs courantes :
+  - **400** (validation)
+  - **401** (identifiants invalides)
 
 ### 2) GET /api/projects
 - Description : liste des projets pour l'utilisateur.
-- Query params : `page`, `perPage`, `search`
+- Query params : **page**, **perPage**, **search**
 - Success (200):
 
 ```json
@@ -255,46 +251,9 @@ Misc
 
 ---
 
-Si vous voulez, je peux :
-- générer automatiquement une page détaillée pour chaque endpoint avec exemple curl et schémas Zod (extraction depuis `packages/api/src/modules/*/routes.ts`), ou
-- générer `openapi.yaml` complet à partir des routes sources pour import dans Postman/Swagger UI.
-
-Dites quelle sortie vous préférez et je la crée automatiquement.
-## Minimal OpenAPI / Swagger snippet
-
-Vous pouvez démarrer une description OpenAPI minimale pour générer une collection Postman ou une spec interactive :
-
-```yaml
-openapi: 3.0.3
-info:
-  title: Hullbay API
-  version: 1.0.0
-paths:
-  /api/auth/login:
-    post:
-      summary: Authentifier un utilisateur
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-      responses:
-        '200':
-          description: OK
-
-```
-
----
-
 ## Conseils pratiques et troubleshooting
 
-- Pour reconstruire l'état désiré à partir de l'état réel : inspectez les labels Docker `bozando.*` (voir `concepts`).
+- Pour reconstruire l'état désiré à partir de l'état réel : inspectez les labels Docker `bozando.*` (voir concepts).
 - Sur erreur `422`, consultez les logs du service `hullbay-backend` et le websocket d'événements pour la trace d'erreur.
 - Pour automatisation CI : stockez un `service account` avec MFA activée et une rotation régulière des tokens.
 
@@ -310,11 +269,11 @@ Dites-moi ce que vous préférez et je continue.
 Chaque route sous `/api/*` exige un JWT Bearer, **sauf** les routes publiques d'amorçage et de connexion (`/api/auth/bootstrap`, `/api/auth/login`, etc.).
 
 :::warning Garde MFA non configurable
-Indépendamment du rôle (owner, operator, viewer), tout compte authentifié avec `mfaEnabled: false` reçoit un `403 Forbidden` sur chaque route, sauf celles dédiées à la configuration de la MFA (`/mfa/enroll`, `/mfa/confirm`) et à la vérification du statut (`/auth/me`).
+Indépendamment du rôle (owner, operator, viewer), tout compte authentifié avec **mfaEnabled: false** reçoit un **403 Forbidden** sur chaque route, sauf celles dédiées à la configuration de la MFA (**/mfa/enroll**, **/mfa/confirm**) et à la vérification du statut (**/auth/me**).
 :::
 
 ### Format des erreurs
-En cas d'échec de validation Zod, l'API renvoie un `400` structuré :
+En cas d'échec de validation Zod, l'API renvoie un **400** structuré :
 ```json
 {
   "statusCode": 400,
