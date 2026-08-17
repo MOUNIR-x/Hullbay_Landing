@@ -5,21 +5,27 @@ import TableOfContents from "./components/TableOfContents";
 import MarkdownRenderer from "./components/MarkdownRenderer";
 import { docFiles, parseFrontmatter, getBreadcrumbs, sidebarConfig } from "./utils/docs";
 import { ChevronRight, Menu } from "lucide-react";
+import Landing from "./pages/Landing";
 
-// Helper to determine the current doc ID from the hash
+// Helper to determine the current doc ID from the hash. Returns null if we should show the landing page.
 const getDocIdFromHash = () => {
   const hash = window.location.hash.substring(1);
-  if (!hash) return "introduction/Pourquoi-hullbay";
+  if (!hash || hash === "/" || hash === "") return null;
   
-  // Extract only the document path part before any secondary hash anchor (e.g. #getting-started/installation#system-requirements)
+  // Extract only the document path part before any secondary hash anchor
   const parts = hash.split("#");
   const docPath = parts[0].split("?")[0];
+  
+  // Check for redirection requests
+  if (docPath === "documentation" || docPath === "docs") {
+    return "introduction/Pourquoi-hullbay";
+  }
   
   // Ensure the document exists in our file map
   if (docFiles[docPath]) {
     return docPath;
   }
-  return "introduction/Pourquoi-hullbay";
+  return null; // Fallback to landing if it doesn't match any document
 };
 
 export default function App() {
@@ -32,16 +38,41 @@ export default function App() {
   // Listen to hash change for routing
   useEffect(() => {
     const handleHashChange = () => {
-      setCurrentDocId(getDocIdFromHash());
+      const docId = getDocIdFromHash();
+      // Handle redirect if user typed #documentation or #docs manually
+      const hash = window.location.hash.substring(1);
+      const parts = hash.split("#");
+      const docPath = parts[0].split("?")[0];
+      if (docPath === "documentation" || docPath === "docs") {
+        window.location.hash = "#introduction/Pourquoi-hullbay";
+        return;
+      }
+      
+      setCurrentDocId(docId);
       setIsMobileSidebarOpen(false); // Close sidebar on nav
     };
 
     window.addEventListener("hashchange", handleHashChange);
+    
+    // Check initial redirect on mount
+    const hash = window.location.hash.substring(1);
+    const parts = hash.split("#");
+    const docPath = parts[0].split("?")[0];
+    if (docPath === "documentation" || docPath === "docs") {
+      window.location.hash = "#introduction/Pourquoi-hullbay";
+    }
+
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   // Load the document content dynamically
   useEffect(() => {
+    if (!currentDocId) {
+      document.title = "Hullbay — Plateforme PaaS visuelle pour Docker Swarm";
+      setIsLoading(false);
+      return;
+    }
+
     let active = true;
     setIsLoading(true);
     setError(null);
@@ -56,9 +87,12 @@ export default function App() {
         const textContent = module.default || module;
         
         if (active) {
-          const { content } = parseFrontmatter(textContent);
+          const { frontmatter, content } = parseFrontmatter(textContent);
           setRawContent(content);
           setIsLoading(false);
+
+          // Update page title
+          document.title = frontmatter.title ? `Hullbay — ${frontmatter.title}` : "Hullbay — Documentation";
           
           // Scroll to top or to specific anchor if present in the hash
           const hashParts = window.location.hash.split("#");
@@ -90,6 +124,10 @@ export default function App() {
       active = false;
     };
   }, [currentDocId]);
+
+  if (!currentDocId) {
+    return <Landing />;
+  }
 
   const breadcrumbs = getBreadcrumbs(currentDocId);
 

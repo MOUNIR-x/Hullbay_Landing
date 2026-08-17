@@ -102,7 +102,7 @@ export default function Header() {
 
         {/* Left Side: Brand */}
         <div className="flex items-center gap-2">
-          <a href="#introduction/Pourquoi-hullbay" className="flex items-center gap-2 group">
+          <a href="#" className="flex items-center gap-2 group">
             <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-white group-hover:opacity-85">
               Hullbay
             </span>

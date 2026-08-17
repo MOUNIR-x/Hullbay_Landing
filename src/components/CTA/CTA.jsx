@@ -16,7 +16,7 @@ export default function CTA() {
           </p>
 
           <div className="cta-btn-group">
-            <a href="#deploiement" className="btn-black">
+            <a href="#guides/deploiement" className="btn-black">
               Deployer avec Hullbay
             </a>
           </div>

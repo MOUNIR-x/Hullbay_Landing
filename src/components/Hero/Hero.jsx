@@ -27,10 +27,10 @@ export default function Hero() {
         </p>
 
         <div className="btn-group">
-          <a href="#deploiement" className="btn-main">
+          <a href="#guides/deploiement" className="btn-main">
             Commencer avec HULLBAY
             <ArrowRight size={18} />
-          </a><a href="#documentation" className="btn-second">
+          </a><a href="#introduction/Pourquoi-hullbay" className="btn-second">
             <BookOpen size={18} />
             Voir la documentation
           </a>
