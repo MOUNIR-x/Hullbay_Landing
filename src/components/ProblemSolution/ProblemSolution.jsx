@@ -27,7 +27,7 @@ export default function ProblemSolution() {
           multiplient.
         </p>
 
-        <a href="#documentation" className="green-link">
+        <a href="#introduction/Pourquoi-hullbay" className="green-link">
           Hullbay →
           <ArrowRight size={18} />
         </a>

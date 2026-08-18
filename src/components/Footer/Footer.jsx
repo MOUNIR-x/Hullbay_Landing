@@ -19,18 +19,18 @@ export default function Footer() {
         <div className="footer-column">
           <h3>PRODUIT</h3>
 
-          <a href="#">Fonctionnalités</a>
-          <a href="#">Architecture</a>
-          <a href="#">Documentation</a>
+          <a href="#fonctionnalites">Fonctionnalités</a>
+          <a href="#internal/architecture">Architecture</a>
+          <a href="#introduction/Pourquoi-hullbay">Documentation</a>
         </div>
 
         {/* Ressources */}
         <div className="footer-column">
           <h3>RESSOURCES</h3>
 
-          <a href="#">DOCUMENTATION</a>
-          <a href="#">GITHUB</a>
-          <a href="#">GUIDE DE DÉMARRAGE</a>
+          <a href="#introduction/Pourquoi-hullbay">DOCUMENTATION</a>
+          <a href="https://github.com/Fotetsa/Hullbay" target="_blank" rel="noreferrer">GITHUB</a>
+          <a href="#getting-started/installation">GUIDE DE DÉMARRAGE</a>
         </div>
 
         {/* Entreprise */}
@@ -53,7 +53,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-legal">
-          Documentation | Github | Licence
+          <a href="#introduction/Pourquoi-hullbay">Documentation</a> | <a href="https://github.com/Fotetsa/Hullbay" target="_blank" rel="noreferrer">Github</a> | Licence
         </div>
 
       </div>

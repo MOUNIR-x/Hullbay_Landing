@@ -7,11 +7,11 @@ import logo from "../../assets/images/logo.png"
 const links = [
   {
     label: "PRODUIT",
-    href: "#produit",
+    href: "#fonctionnalites",
   },
   {
     label: "DOCUMENTATION",
-    href: "#documentation",
+    href: "#introduction/Pourquoi-hullbay",
   },
 ];
 
@@ -23,7 +23,7 @@ export default function Navbar() {
       <div className="main-container">
 
         {/* Logo et Nom du site */}
-        <a href="/" className="logo-box">
+        <a href="#" className="logo-box">
           <div className="logo-icon">
             <img src= {logo} alt="H" />
           </div>
