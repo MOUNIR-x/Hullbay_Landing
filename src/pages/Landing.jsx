@@ -1,29 +1,29 @@
-import Navbar from "../components/Navbar/Navbar.jsx";
-import Hero from "../components/Hero/Hero.jsx";
-import Features from "../components/Features/Features.jsx";
-import Contribution from "../components/Contribution/Contribution.jsx";
-import CTA from "../components/CTA/CTA.jsx";
-import Footer from "../components/Footer/Footer.jsx";
-
-import "../css/global.css";
-import ProblemSolution from "../components/ProblemSolution/ProblemSolution.jsx";
+import { useEffect } from "react";
+import { LandingFooter, LandingHeader } from "../components/landing/LandingChrome";
+import LandingHero from "../components/landing/LandingHero";
+import { Features, FinalCta, Install, ProductOverview, Security, Workflow } from "../components/landing/LandingSections";
+import "./Landing.css";
 
 export default function Landing() {
-  return (
-    <main className="landing-page">
-      <Navbar />
+  useEffect(() => {
+    const onScroll = () => document.querySelector(".hb-nav")?.classList.toggle("is-scrolled", window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-      <Hero />
+  useEffect(() => {
+    const elements = document.querySelectorAll(".hb-proof-grid, .hb-section, .hb-feature, .hb-step-grid article, .hb-security-card, .hb-final > .hb-wrap > div");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      elements.forEach((element) => element.classList.add("is-visible"));
+      return undefined;
+    }
+    elements.forEach((element) => element.classList.add("hb-reveal"));
+    const observer = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      if (entry.isIntersecting) { entry.target.classList.add("is-visible"); observer.unobserve(entry.target); }
+    }), { threshold: 0.14 });
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
 
-      <ProblemSolution />
-
-      <Features />
-
-      <Contribution />
-
-      <CTA />
-
-      <Footer />
-    </main>
-  );
+  return <div className="hullbay-landing" id="top"><LandingHeader /><main><LandingHero /><ProductOverview /><Workflow /><Features /><Install /><Security /><FinalCta /></main><LandingFooter /></div>;
 }
