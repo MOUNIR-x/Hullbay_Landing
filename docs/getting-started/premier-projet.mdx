@@ -21,20 +21,20 @@ Le canvas représente l'**État Désiré** de votre infrastructure. Commençons 
 ### Ajouter un Réseau
 1. Ouvrez la **Palette** (panneau latéral gauche).
 2. Glissez-déposez un nœud de type **Network** sur la zone de travail.
-3. Cliquez sur le nœud pour l'éditer et nommez-le `reseau-principal`.
+3. Cliquez sur le nœud pour l'éditer et nommez-le reseau-principal.
 
 ### Ajouter un Conteneur
 1. Glissez-déposez un nœud de type **Container** à côté du réseau.
-2. Nommez-le `web-server`.
+2. Nommez-le web-server.
 3. Dans le panneau d'inspection (à droite), configurez les propriétés :
-   - **Image** : `nginx:alpine`
-   - **Port** : `80`
+   - **Image** : **nginx:alpine**
+   - **Port** : **80**
    - **Variables d'environnement** : *(laissez vide pour cet exemple)*
 
 ### Ajouter une Passerelle (Gateway)
 1. Glissez-déposez un nœud de type **Gateway**.
-2. Nommez-le `expo-publique`.
-3. Configurez-le pour qu'il pointe vers le port `80` de votre `web-server`. Caddy gérera automatiquement le reverse proxy et, si un domaine est configuré, le certificat SSL.
+2. Nommez-le **expo-publique**.
+3. Configurez-le pour qu'il pointe vers le port **80** de votre **web-server**. Caddy gérera automatiquement le reverse proxy et, si un domaine est configuré, le certificat SSL.
 
 ### Connecter les nœuds
 1. Cliquez sur le point de connexion (handle) du nœud web-server et tirez un trait vers reseau-principal.
@@ -53,9 +53,9 @@ Hullbay ne déploie rien à l'aveugle. Il calcule d'abord la différence entre v
 
 1. Cliquez sur le bouton **"Revoir et déployer"** en haut à droite du canvas.
 2. Une modale s'ouvre, affichant le **Plan d'actions** généré par le Réconcilier :
-   -  **Create** : `network mon-site-web-a3f8-reseau-principal`
-   -  **Create** : `service mon-site-web-a3f8-web-server`
-   -  **Create** : `route caddy pour mon-site-web-a3f8-expo-publique`
+   -  **Create** : **network mon-site-web-a3f8-reseau-principal**
+   -  **Create** : **service mon-site-web-a3f8-web-server**
+   -  **Create** : **route caddy pour mon-site-web-a3f8-expo-publique**
 3. Vérifiez que les actions correspondent à vos attentes. C'est votre dernière chance d'annuler avant l'exécution.
 4. Cliquez sur **"Confirmer le déploiement"**.
 
@@ -71,7 +71,7 @@ curl -X POST https://your.hullbay.server/api/auth/login \
    -d '{"email":"owner@example.com","password":"votre-mot-de-passe"}'
 ```
 
-Réponse attendue : objet JSON contenant `token`.
+Réponse attendue : objet JSON contenant **token**.
 
 - Récupérer le plan pour un projet :
 
@@ -89,7 +89,7 @@ curl -X POST "https://your.hullbay.server/api/projects/<PROJECT_ID>/deploy" \
    -d '{"confirm":true}'
 ```
 
-Remplacez `<PROJECT_ID>` et `<JWT_TOKEN>` par vos valeurs réelles.
+Remplacez **<PROJECT_ID>** et **<JWT_TOKEN>** par vos valeurs réelles.
 
 ---
 
@@ -111,7 +111,7 @@ Si vous aviez spécifié une image inexistante (ex: nginx:inexistant), le déplo
 
 Pour cet exercice, vous pouvez supprimer ce projet de test pour repartir à zéro. Il est crucial de comprendre la différence entre deux actions :
 
-- **Détruire (Destroy)** : Supprime **toutes les ressources Docker réelles** (conteneurs, réseaux, routes Caddy) dans l'ordre inverse du déploiement, mais **conserve votre dessin** en base de données (le statut repasse à `draft`). C'est l'action à utiliser pour arrêter un projet temporairement.
+- **Détruire (Destroy)** : Supprime **toutes les ressources Docker réelles** (conteneurs, réseaux, routes Caddy) dans l'ordre inverse du déploiement, mais **conserve votre dessin** en base de données (le statut repasse à **draft**). C'est l'action à utiliser pour arrêter un projet temporairement.
 - **Supprimer (Delete)** : Efface **uniquement le dessin** (l'état désiré en base de données). 
 
 :::warning Danger de ressources orphelines
