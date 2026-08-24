@@ -15,14 +15,14 @@ Ce guide décrit comment déployer **Hullbay** sur un serveur VPS ou une machine
 
 ## Installation en une ligne de commande
 
-Le moyen le plus simple d'installer Hullbay est le script officiel [`install.sh`](https://github.com/Fotetsa/hullbay/blob/master/install.sh). Il s'occupe de :
+Le moyen le plus simple d'installer Hullbay est le script officiel [install.sh](https://github.com/Fotetsa/hullbay/blob/master/install.sh). Il s'occupe de :
 
 1. Installer **Docker** (via get.docker.com) si absent
 2. Initialiser **Docker Swarm** si le nœud n'est pas déjà en mode Swarm
-3. Créer le réseau overlay **`boz_system`** (partagé entre Caddy et les services exposés)
-4. Préparer le dossier d'installation (défaut : `/opt/hullbay`)
-5. Télécharger `docker-compose.prod.yml` et le `Caddyfile`
-6. Générer le fichier **`.env`** (secrets JWT, MFA, PostgreSQL…) — créé une seule fois, jamais écrasé
+3. Créer le réseau overlay **boz_system** (partagé entre Caddy et les services exposés)
+4. Préparer le dossier d'installation (défaut : /opt/hullbay)
+5. Télécharger docker-compose.prod.yml et le Caddyfile
+6. Générer le fichier **.env** (secrets JWT, MFA, PostgreSQL…) — créé une seule fois, jamais écrasé
 7. Démarrer la pile : PostgreSQL, Redis, socket-proxy, API, Web et Caddy
 
 Exécutez la commande suivante en tant que root ou avec **sudo** :
@@ -30,16 +30,6 @@ Exécutez la commande suivante en tant que root ou avec **sudo** :
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh | sudo bash
 ```
-
-:::tip Audit du script
-Pour inspecter le script avant exécution :
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh -o install.sh
-less install.sh
-sudo bash install.sh
-```
-:::
 
 ---
 
@@ -61,7 +51,7 @@ export PUBLIC_HOST=ops.mon-domaine.fr
 curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh | sudo bash
 ```
 
-Sans `PUBLIC_HOST`, Hullbay est accessible en **HTTP** sur l'adresse IP du serveur (port 80).
+Sans PUBLIC_HOST, Hullbay est accessible en **HTTP** sur l'adresse IP du serveur (port 80).
 
 ---
 
@@ -69,8 +59,8 @@ Sans `PUBLIC_HOST`, Hullbay est accessible en **HTTP** sur l'adresse IP du serve
 
 Une fois l'installation terminée, le script affiche l'URL d'accès :
 
-- Avec domaine : `https://<PUBLIC_HOST>`
-- Sans domaine : `http://<IP-du-serveur>`
+- Avec domaine : https://<PUBLIC_HOST>
+- Sans domaine : http://<IP-du-serveur>
 
 ### Créer le compte propriétaire
 
@@ -92,7 +82,7 @@ Activez la **MFA (TOTP)** dans les paramètres du compte **avant** d'exposer Hul
 
 ## Services déployés
 
-La pile de production (`docker-compose.prod.yml`) comprend :
+La pile de production (docker-compose.prod.yml) comprend :
 
 | Service | Rôle |
 | :--- | :--- |
@@ -103,7 +93,7 @@ La pile de production (`docker-compose.prod.yml`) comprend :
 | **web** | Interface React (canvas visuel, déploiements, monitoring) |
 | **caddy** | Reverse proxy, TLS automatique, routage vers l'API et le frontend |
 
-Tous les conteneurs système portent le label `bozando.system=true` : ils ne peuvent pas être supprimés par les opérations de nettoyage ou de déploiement depuis le canvas.
+Tous les conteneurs système portent le label bozando.system=true : ils ne peuvent pas être supprimés par les opérations de nettoyage ou de déploiement depuis le canvas.
 
 ---
 
@@ -122,7 +112,7 @@ docker compose ps
 docker network inspect boz_system
 ```
 
-Si tous les conteneurs sont `running` et que l'URL s'ouvre dans le navigateur, passez au guide [Créer votre premier projet](#getting-started/premier-projet).
+Si tous les conteneurs sont running et que l'URL s'ouvre dans le navigateur, passez au guide [Créer votre premier projet](#getting-started/premier-projet).
 
 ---
 
