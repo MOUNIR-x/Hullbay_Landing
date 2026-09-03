@@ -4,8 +4,21 @@ import Sidebar from "./components/Sidebar";
 import TableOfContents from "./components/TableOfContents";
 import MarkdownRenderer from "./components/MarkdownRenderer";
 import { docFiles, parseFrontmatter, getBreadcrumbs, sidebarConfig } from "./utils/docs";
-import { ChevronRight, Menu } from "lucide-react";
+import { ChevronRight, ChevronLeft, Menu } from "lucide-react";
 import Landing from "./pages/Landing";
+
+// Flatten the sidebar into a single ordered list for prev/next navigation
+const getFlatNavItems = () => sidebarConfig.flatMap((cat) => cat.items);
+
+// Compute prev and next items relative to the current doc
+const getNavItems = (currentDocId) => {
+  const all = getFlatNavItems();
+  const idx = all.findIndex((item) => item.id === currentDocId);
+  return {
+    prev: idx > 0 ? all[idx - 1] : null,
+    next: idx < all.length - 1 ? all[idx + 1] : null,
+  };
+};
 
 // Helper to determine the current doc ID from the hash. Returns null if we should show the landing page.
 const getDocIdFromHash = () => {
@@ -206,9 +219,45 @@ export default function App() {
                 {error}
               </div>
             ) : (
-              <article className="prose dark:prose-invert max-w-none">
-                <MarkdownRenderer rawContent={rawContent} />
-              </article>
+              <>
+                <article className="prose dark:prose-invert max-w-none">
+                  <MarkdownRenderer rawContent={rawContent} />
+                </article>
+
+                {/* Prev / Next navigation */}
+                {(() => {
+                  const { prev, next } = getNavItems(currentDocId);
+                  if (!prev && !next) return null;
+                  return (
+                    <nav className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-6 flex items-stretch justify-between gap-4">
+                      {prev ? (
+                        <a
+                          href={`#${prev.id}`}
+                          className="group flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-5 py-4 text-sm transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-blue-950/30 max-w-[48%]"
+                        >
+                          <ChevronLeft className="h-4 w-4 shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                          <div className="text-left">
+                            <div className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">Précédent</div>
+                            <div className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">{prev.label}</div>
+                          </div>
+                        </a>
+                      ) : <div />}
+                      {next ? (
+                        <a
+                          href={`#${next.id}`}
+                          className="group flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 px-5 py-4 text-sm transition-colors hover:border-blue-500 hover:bg-blue-50 dark:hover:border-blue-600 dark:hover:bg-blue-950/30 max-w-[48%] ml-auto"
+                        >
+                          <div className="text-right">
+                            <div className="text-xs font-medium text-gray-400 dark:text-gray-500 mb-0.5">Suivant</div>
+                            <div className="font-semibold text-gray-800 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-1">{next.label}</div>
+                          </div>
+                          <ChevronRight className="h-4 w-4 shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                        </a>
+                      ) : <div />}
+                    </nav>
+                  );
+                })()}
+              </>
             )}
           </div>
         </main>

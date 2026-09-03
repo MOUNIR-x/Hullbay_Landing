@@ -1,0 +1,27 @@
+# Traçabilité & Logs d'Audit
+
+Dans les environnements multi-utilisateurs et de production, la traçabilité des opérations est cruciale pour la conformité et la sécurité (Zero Trust). Hullbay intègre un système d'Audit Logs complet.
+
+---
+
+## Qu'est-ce qui est tracé ?
+
+Le système enregistre de manière immuable toute action modifiant l'état du système. Cela inclut, de manière non exhaustive :
+- **Déploiements** : Exécution d'un plan de déploiement, création ou suppression de conteneurs/réseaux.
+- **Gestion des Nœuds** : Ajout ou suppression de nœuds dans le cluster Swarm.
+- **Gestion des Accès** : Création de nouveaux comptes, modifications de rôles (RBAC), tentatives de connexion (réussites ou échecs).
+- **Secrets & Registres** : Ajout ou mise à jour de variables d'environnement, de tokens de registre, ou de certificats.
+
+---
+
+## Consultation des Logs
+
+Les logs d'audit sont consultables directement depuis l'interface d'administration de Hullbay par les utilisateurs ayant le rôle **Owner**.
+
+Chaque entrée d'audit précise :
+1. **L'acteur** (Qui a fait l'action ? ID Utilisateur / Email)
+2. **L'action** (Quelle route API ou quelle opération a été déclenchée ?)
+3. **L'horodatage** (Quand l'action s'est-elle produite ?)
+4. **Le contexte** (Diff des modifications apportées ou payload associé)
+
+> **Protection des données (Redaction)** : Conformément aux meilleures pratiques de sécurité, les valeurs sensibles (mots de passe, tokens, variables d'environnement secrètes) sont systématiquement masquées (*redacted*) avant d'être écrites dans les logs d'audit.

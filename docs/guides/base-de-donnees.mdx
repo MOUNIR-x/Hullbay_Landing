@@ -1,0 +1,61 @@
+# Configurer une base de données
+
+Ce guide décrit la mise en place d'une base de données dans Hullbay, en partant du cas le plus simple jusqu'au cas de production avec haute disponibilité.
+
+## 1. Quand utiliser le mode simple
+
+Le mode simple est la bonne option si :
+
+- vous développez localement ;
+- votre application est petite ou peu sollicitée ;
+- vous voulez une base rapide à intégrer au canvas.
+
+## 2. Quand passer en HA
+
+Le mode HA est adapté lorsque :
+
+- la base de données est critique pour le service ;
+- vous voulez plus de tolérance aux pannes ;
+- les charges se répartissent sur plusieurs nœuds ;
+- vous avez besoin d'un mécanisme de leader/follower ou de consensus.
+
+Dans le dépôt cible, la logique de base HA est explicitement conçue autour des composants de coordination et des patterns Patroni.
+
+## 3. Procédure pratique
+
+1. Ajoutez un nœud `database` au canvas.
+2. Sélectionnez le moteur et le mode.
+3. Connectez l'application au nœud via une arête de données.
+4. Vérifiez que les variables de connexion sont bien injectées.
+5. Déployez le projet en examinant le plan.
+
+## 4. Vérification du bon fonctionnement
+
+Après le déploiement, vérifiez :
+
+- le service de base est bien démarré ;
+- les ports attendus sont ouverts ;
+- la base répond aux connexions internes ;
+- l'application accède au bon `DATABASE_HOST` et `DATABASE_PORT` ;
+- le mode HA a bien réparti les replicas et le leader.
+
+## 5. Migrations de configuration
+
+Un cas courant consiste à passer :
+
+- d'un simple nœud de base à un nœud de base en HA ;
+- d'une configuration "single" vers un mode plus robuste ;
+- d'un projet de test vers un projet de production.
+
+Le bon réflexe est de faire ce type de changement en validant le plan de déploiement avant toute application, plutôt que de modifier directement la configuration sans revue.
+
+## 6. Recommandations
+
+- séparez les domaines de test et de production ;
+- testez toujours la reprise sur incident avant de prendre le mode HA pour critiquement important ;
+- gardez les secrets et les accès aux services bien séparés ;
+- surveillez les replicas et la santé du cluster.
+
+:::warning
+La documentation du dépôt cible souligne que le mode HA est un vrai point fort du produit, mais il n'est pas une "simple variation de configuration". Il faut intégrer la santé du système et la resynchronisation des replicas dans la stratégie de supervision.
+:::

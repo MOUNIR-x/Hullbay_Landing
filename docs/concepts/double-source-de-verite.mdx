@@ -1,0 +1,51 @@
+# La double source de vérité
+
+Ce concept est central dans Hullbay : le système ne confond jamais l'intention et la réalité.
+
+## 1. L'état désiré
+
+L'état désiré correspond à ce que vous dessinez sur le canvas. Il est stocké dans la base de données et décrit l'architecture voulue :
+
+- projet ;
+- nœuds ;
+- arêtes ;
+- configuration des services ;
+- paramètres de réseau, de volume et de gateway.
+
+C'est la source de vérité de conception.
+
+## 2. L'état réel
+
+L'état réel correspond à ce qui est vraiment présent dans le cluster Docker Swarm. Hullbay l'observe via les labels Docker et les informations du runtime.
+
+Les labels `bozando.*` servent de trace lors du reconciliation.
+
+## 3. Pourquoi ce mécanisme est important
+
+Le reconciler compare constamment l'état désiré et l'état réel. S'il constate une dérive, il n'applique pas seulement un correctif local : il construit un plan, valide les actions, puis exécute les changements nécessaires.
+
+Cette séparation évite les erreurs de logique et donne à l'outil un comportement très lisible :
+
+- on sait ce que l'on a voulu faire ;
+- on sait ce qui est réellement en place ;
+- on peut corriger la différence.
+
+## 4. Rebuild et résilience
+
+Le système peut reconstruire son état désiré à partir des labels présents dans le cluster. Cela signifie que la base de données n'est pas un point de défaillance unique : elle sert aussi de cache d'opérations, mais elle n'est pas l'unique source de vérité technique.
+
+:::tip
+C'est une architecture particulièrement utile pour les équipes ops : on peut réparer les écarts sans perdre la trace de l'intention métier du projet.
+:::
+
+---
+
+## 5. À retenir
+
+Hullbay travaille comme un système de gestion de configuration déployée :
+
+- le canvas décrit l'intention ;
+- le runtime l'observe ;
+- le reconciler rétablit la cohérence.
+
+C'est précisément cette logique qui permet à Hullbay d'être à la fois visuel, sûr et opérationnel.

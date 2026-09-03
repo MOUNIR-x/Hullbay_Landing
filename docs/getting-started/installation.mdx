@@ -1,4 +1,4 @@
-﻿
+
 # Installation et prérequis
 
 Ce guide décrit comment déployer **Hullbay** sur un serveur VPS ou une machine physique fraîche. L'installation est **idempotente** : vous pouvez relancer le script sans risquer de corrompre une instance existante.
@@ -40,7 +40,7 @@ Vous pouvez personnaliser l'installation en exportant ces variables **avant** de
 | Variable | Défaut | Description |
 | :--- | :--- | :--- |
 | GHCR_OWNER | fotetsa | Propriétaire des images sur GitHub Container Registry |
-| IMAGE_TAG | latest | Tag des images Docker (ghcr.io/<owner>/hullbay/api et /web) |
+| IMAGE_TAG | latest | Tag des images Docker (ghcr.io/\<owner\>/hullbay/api et /web) |
 | PUBLIC_HOST | *(vide)* | Domaine public pour HTTPS automatique via Let's Encrypt (ex. ops.example.com) |
 | INSTALL_DIR | /opt/hullbay | Dossier d'installation sur le serveur |
 
@@ -59,8 +59,8 @@ Sans PUBLIC_HOST, Hullbay est accessible en **HTTP** sur l'adresse IP du serveur
 
 Une fois l'installation terminée, le script affiche l'URL d'accès :
 
-- Avec domaine : https://<PUBLIC_HOST>
-- Sans domaine : http://<IP-du-serveur>
+- Avec domaine : https://\<PUBLIC_HOST\>
+- Sans domaine : http://\<IP-du-serveur\>
 
 ### Créer le compte propriétaire
 
@@ -112,7 +112,7 @@ docker compose ps
 docker network inspect boz_system
 ```
 
-Si tous les conteneurs sont running et que l'URL s'ouvre dans le navigateur, passez au guide [Créer votre premier projet](#getting-started/premier-projet).
+Si tous les conteneurs sont running et que l'URL s'ouvre dans le navigateur, passez au guide [Créer votre premier projet](./premier-projet).
 
 ---
 
@@ -125,4 +125,4 @@ Si tous les conteneurs sont running et que l'URL s'ouvre dans le navigateur, pas
 | HTTPS ne fonctionne pas | Vérifier que PUBLIC_HOST pointe vers l'IP du serveur et que le port 443 est ouvert |
 | .env existant conservé | Normal — le script ne régénère jamais les secrets d'une install existante |
 
-Pour plus de détails, consultez le guide [Dépannage](#guides/depannage).
+Pour plus de détails, consultez le guide [Dépannage](../guides/depannage).

@@ -1,0 +1,73 @@
+# Les 5 types de nœuds de Hullbay
+
+Hullbay adopte un modèle de canvas explicite où chaque nœud a un type défini. Ce type n'est pas seulement décoratif : il détermine les règles de connexion, le schéma de configuration, et le comportement de déploiement.
+
+## 1. container
+
+Le nœud `container` représente un service Docker que vous souhaitez exécuter. Il permet de configurer :
+
+- l'image ;
+- les variables d'environnement ;
+- les dépendances réseau ;
+- les volumes ;
+- les ressources CPU/RAM ;
+- le port ou les ports exposés.
+
+## 2. network
+
+Le nœud `network` représente un réseau overlay Docker. Il sert à isoler ou relier les services d'un même projet ou d'un cluster.
+
+Il est indispensable pour :
+
+- isoler les composants applicatifs ;
+- gérer les services internes ;
+- assurer le bon routage entre les services du projet.
+
+## 3. volume
+
+Le nœud `volume` représente un stockage persistant attaché à un conteneur. Son rôle est de garantir que les données survivent aux redémarrages du service.
+
+## 4. gateway
+
+Le nœud `gateway` représente une route ou un endpoint public. Entièrement intégré, il est utilisé pour exposer un service via Caddy avec gestion TLS et reverse proxy.
+
+C'est le mécanisme qui permet d'éviter d'écrire manuellement le reverse proxy de chaque service.
+
+## 5. database
+
+Le nœud `database` est le plus important pour les cas de production. Il représente une source de données intégrée dans le canvas, avec support pour :
+
+- base simple ;
+- base en mode HA ;
+- injection de variables de connexion dans les services ;
+- topologie distribuée sur plusieurs nœuds.
+
+Le mode `database` est aujourd'hui l'un des meilleurs arguments produit de Hullbay, parce qu'il combine orchestrateur Docker, validation et gestion de la persistance de données dans un seul workflow visuel.
+
+## 6. Règles de connexion
+
+Les liens entre nœuds ne sont pas libres. Hullbay les valide explicitement :
+
+- un service ne peut pas être relié à un volume comme s'il s'agissait d'une route ;
+- certaines liaisons sont inférées automatiquement selon les types de nœuds ;
+- les erreurs de structure sont rejetées avant application du plan.
+
+Cela réduit la probabilité d'avoir des déploiements incohérents.
+
+:::info
+Le produit a évolué : le modèle initial ne décrivait que 4 types de nœuds. Le dépôt cible montre explicitement le 5e type `database`, ainsi que le support d'un mode HA et d'un comportement de multi-cluster, ce qui doit être reflété dans la documentation publique.
+:::
+
+---
+
+## 7. En pratique
+
+Dans un projet simple, vous aurez souvent :
+
+- un conteneur applicatif ;
+- une base de données ;
+- un ou plusieurs réseaux ;
+- un gateway pour le public ;
+- un ou plusieurs volumes de persistence.
+
+Mieux que de décrire ces éléments séparément, Hullbay les rend composables dans un seul modèle visuel.

@@ -1,4 +1,4 @@
-﻿
+
 # Vue d'ensemble de la sécurité
 
 Hullbay pilote un cluster Docker Swarm, ce qui signifie que l'accès au démon Docker équivaut à un contrôle **root** sur les serveurs du cluster. La sécurité n'est pas une option : elle est intégrée à chaque couche de l'architecture, de l'authentification à la gestion des secrets en passant par l'isolation du socket Docker.
@@ -64,6 +64,19 @@ La perte de ces clés rend :
 
 ---
 
+## Tunnels SSH et Ports d'administration
+
+La plateforme Hullbay communique avec les serveurs de votre infrastructure (que ce soit pour l'API Docker sur le port 2375 ou l'administration Caddy sur le port 2019) d'une manière hautement sécurisée.
+
+Ces ports d'administration ne sont **jamais exposés publiquement**, quel que soit l'état du pare-feu du serveur.
+Ils sont publiés exclusivement sur l'interface locale (`127.0.0.1`) du serveur distant lors du déploiement. 
+
+Hullbay y accède exclusivement via des **tunnels SSH éphémères**, en réutilisant la clé de maintenance posée pendant le provisionnement initial. Aucune action manuelle n'est requise de votre part pour sécuriser ces ports.
+
+> **Limite connue :** Les tunnels SSH sont ouverts à la demande et gardés en mémoire par le backend de Hullbay. Un redémarrage du backend ferme tous les tunnels (ils se rouvrent automatiquement au prochain appel). Si le serveur distant devient injoignable en SSH (problème réseau ou arrêt du serveur SSH), les actions d'administration seront bloquées. C'est un comportement voulu (fail-secure).
+
+---
+
 ##  Divulgation responsable
 
 Si vous découvrez une vulnérabilité de sécurité dans Hullbay :
@@ -78,6 +91,6 @@ La sécurité de la communauté dépend de la discrétion et de la collaboration
 
 ## Prochaines étapes
 
-- [Contrôle d'accès basé sur les rôles (RBAC)](#security/rbac)
-- [Chiffrement et gestion des secrets](#security/secrets)
-- [Protection du socket Docker](#security/docker-socket)
+- [Contrôle d'accès basé sur les rôles (RBAC)](./rbac)
+- [Chiffrement et gestion des secrets](./secrets)
+- [Protection du socket Docker](./docker-socket)

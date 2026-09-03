@@ -1,0 +1,49 @@
+# Multi-cluster
+
+Hullbay n'a pas été conçu comme un outil monolithique "un cluster = une instance". Une installation Hullbay peut gérer plusieurs clusters Docker Swarm indépendants, à partir d'une même base de contrôle et d'une même UI.
+
+## 1. Pourquoi c'est utile
+
+Les équipes infra ne gèrent pas toujours un seul périmètre. Elles peuvent avoir :
+
+- un cluster de production ;
+- un cluster de préproduction ;
+- un cluster d'expérimentation ;
+- un cluster par région ou par client.
+
+Hullbay permet de garder un modèle de gestion cohérent sur plusieurs contextes, sans multiplier les outils ou les interfaces.
+
+## 2. Modèle opérationnel
+
+L'instance Hullbay joue le rôle d'un plan de contrôle global :
+
+- elle sait quels clusters sont connus ;
+- un projet ou une ressource est rattaché à un cluster spécifique ;
+- le système peut monter plusieurs topologies indépendantes dans la même vue de gestion.
+
+Il ne s'agit pas de "fusionner les clusters" dans une seule ressource. Il s'agit plutôt de permettre qu'un opérateur pilote plusieurs environnements cohérents depuis un seul service de contrôle.
+
+## 3. Ce qui change pour les opérations
+
+Le multi-cluster change la façon de penser :
+
+- les workflows de provisioning ne sont plus liés à un seul cluster au sens strict ;
+- la sécurité et les permissions peuvent être gérées au niveau d'un périmètre ;
+- les métriques et l'intégrité d'un cluster peuvent être observées séparément.
+
+## 4. Bonnes pratiques
+
+- nommez clairement les clusters ;
+- séparez les environnements de production et de test ;
+- évitez d'utiliser le même nom logique dans plusieurs périmètres ;
+- documentez bien les relations entre services et clusters dans les projets.
+
+:::info
+Dans le dépôt cible, le concept de multi-cluster est explicite dans le code backend et dans l'UI. C'est un point produit fort, mais il était quasiment absent de la documentation publique avant la mise à jour du site.
+:::
+
+---
+
+## 5. À retenir
+
+Le multi-cluster n'est pas une fonction accessoire : c'est un mode de gouvernance pour des organisations qui doivent gérer plusieurs environnements de façon sûre et centralisée.

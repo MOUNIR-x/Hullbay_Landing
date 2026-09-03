@@ -1,4 +1,4 @@
-﻿
+
 # Concepts fondamentaux
 
 Pour maîtriser Hullbay, il est essentiel de comprendre le modèle mental sur lequel la plateforme est construite. Contrairement aux outils d'orchestration traditionnels, Hullbay adopte une approche **visuelle, déclarative et résiliente**.
@@ -54,33 +54,3 @@ Le déploiement n'est pas une simple exécution de script. C'est un processus co
 3. **Exécution atomique (POST /deploy)** : 
    - Un seul déploiement par projet est autorisé à la fois (409 Conflict sinon).
    - En cas d'échec actionnable (erreur 422 : image manquante, secret absent), le système effectue un rollback automatique de tout ce qui a été créé pendant cette tentative, laissant le cluster dans un état stable.
-
-   ---
-
-   ## Commandes & suivi (pratique)
-
-   Pour diagnostiquer l'état réel du cluster et suivre la correspondance avec l'état désiré, utilisez ces commandes :
-
-   - Lister les services et leurs labels :
-
-   ```bash
-   docker service ls --format "{{.ID}}\t{{.Name}}"
-   docker service inspect <SERVICE_ID> --format '{{json .Spec.Labels}}'
-   ```
-
-   - Inspecter un conteneur et ses labels runtime :
-
-   ```bash
-   docker ps --filter "name=<service_name>"
-   docker inspect <CONTAINER_ID> --format '{{json .Config.Labels}}'
-   ```
-
-   Les labels clefs incluent bozando.projectId, bozando.nodeName, bozando.spec et bozando.system=true pour les ressources système. Ces labels sont la source de vérité secondaire utilisée pour la reconstruction.
-
----
-
-## Sécurité par conception (Secure by Default)
-
-- **Proxy de Socket Docker** : L'API ne communique jamais directement avec /var/run/docker.sock. Elle passe par un proxy tecnativa/docker-socket-proxy qui bloque explicitement les commandes EXEC et les accès bruts aux conteneurs, ne laissant passer que les opérations Swarm nécessaires.
-- **Immunisation du système** : Les conteneurs qui composent Hullbay lui-même sont étiquetés bozando.system=true. Le moteur de nettoyage (prune) est codé pour ignorer systématiquement ces ressources, empêchant tout auto-démantèlement accidentel.
-- **Chiffrement** : Les clés SSH de provisionnement et les tokens de registre sont chiffrés en **AES-256-GCM** au repos dans la base de données.

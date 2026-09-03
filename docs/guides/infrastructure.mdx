@@ -1,4 +1,4 @@
-﻿
+
 # Infrastructure et serveurs
 
 Hullbay est conçu pour fonctionner sur un serveur unique ou un cluster Docker Swarm multi-nœuds. Ce guide détaille comment étendre votre infrastructure en ajoutant des serveurs et comment Hullbay sécurise les communications avec le démon Docker.
@@ -22,7 +22,53 @@ Lors de l'installation initiale, le premier serveur est automatiquement initiali
 
 ---
 
-## 2. Ajouter un serveur via SSH
+## 2. Quorum, Raft et Haute Disponibilité (HA)
+
+### Le Quorum Raft
+
+Docker Swarm utilise l'algorithme de consensus **Raft** pour maintenir un état cohérent entre ses nœuds managers. Pour que le cluster soit opérationnel et puisse prendre des décisions (déploiement, mise à l'échelle), un **quorum** doit être atteint — c'est-à-dire la majorité stricte des managers doit être joignable.
+
+La règle est : `quorum = (N / 2) + 1`
+
+| Nombre de Managers | Quorum requis | Tolérance aux pannes |
+| :---: | :---: | :---: |
+| 1 | 1 | **0** (pas de HA) |
+| 3 | 2 | 1 manager peut tomber |
+| 5 | 3 | 2 managers peuvent tomber |
+| 7 | 4 | 3 managers peuvent tomber |
+
+:::warning Toujours un nombre impair de managers
+N'utilisez jamais un nombre **pair** de managers. Avec 2 managers, si l'un tombe, le quorum (2/2 = 1) n'est plus atteint et le cluster se retrouve en état figé, exactement comme avec 1 seul manager — mais avec plus de complexité inutile.
+:::
+
+### Replicas : Désiré vs Réel
+
+Hullbay distingue deux notions de replicas, visibles directement sur le canvas et sur la page Santé :
+
+- **`desiredReplicas`** : Le nombre de répliques **que vous avez configuré** pour un service dans le canvas. C'est la source de vérité désirée, stockée en base de données PostgreSQL.
+- **`runningReplicas`** : Le nombre de répliques **réellement actives** à l'instant T, observé en temps réel via le WebSocket (`node.replicas`). Hullbay synchronise cette valeur automatiquement toutes les quelques secondes.
+
+Sur le canvas, le nœud d'un service affiche une **pile 3D** dont la hauteur correspond au nombre de replicas en cours d'exécution. Si `runningReplicas < desiredReplicas`, le nœud passe au rouge (dérive détectée).
+
+### Placement des services sur le cluster
+
+Swarm distribue automatiquement les conteneurs sur les nœuds disponibles. Sur le canvas, vous pouvez voir en temps réel **sur quel nœud physique** chaque réplique tourne grâce aux `onNodePlacements` — une couleur différente est attribuée à chaque nœud via la bibliothèque `clusterNodeColors`.
+
+### Haute Disponibilité (HA) des bases de données
+
+Lorsque vous ajoutez une base de données sur le canvas, Hullbay vous propose un **mode HA** avec deux paramètres :
+
+- **`replicas`** : Nombre de répliques de lecture de la base de données.
+- **`consensusReplicas`** : Nombre de nœuds participant au vote de consensus pour l'élection du leader (ex: pour les bases de données de type Galera Cluster ou Patroni).
+
+:::info Mode simple vs mode HA
+Pour un environnement de développement ou à faible charge, un réplica unique (`replicas: 1`) est suffisant. En production multi-nœuds, activez le mode HA et assurez-vous d'avoir assez de Workers pour distribuer les répliques sur des machines différentes — cela garantit la disponibilité en cas de panne d'un nœud.
+:::
+
+---
+
+## 3. Ajouter un serveur via SSH
+
 
 Le provisioning de nouveaux serveurs se fait de manière sécurisée via SSH. Hullbay génère une paire de clés éphémère pour chaque opération.
 

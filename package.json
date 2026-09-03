@@ -3,19 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "docusaurus": "docusaurus",
-    "start": "vite",
-    "dev": "vite",
+    "start": "vite --host 0.0.0.0",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview",
-    "docusaurus-start": "docusaurus start",
-    "docusaurus-build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy",
-    "clear": "docusaurus clear",
-    "serve": "docusaurus serve",
-    "write-translations": "docusaurus write-translations",
-    "write-heading-ids": "docusaurus write-heading-ids",
+    "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc"
   },
   "dependencies": {
@@ -47,7 +38,7 @@
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.25",
     "tailwindcss": "^3.4.19",
-    "typescript": "~5.5.0"
+    "typescript": "^5.9.2"
   },
   "browserslist": {
     "production": [

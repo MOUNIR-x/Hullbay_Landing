@@ -1,4 +1,4 @@
-﻿
+
 # Créer votre premier projet
 
 Maintenant que Hullbay est installé et que votre compte **Owner** est configuré avec la MFA, vous êtes prêt à déployer votre première infrastructure. Ce guide vous accompagne dans la création d'une application web simple (un serveur Nginx) avec son réseau dédié et son exposition publique.
@@ -89,7 +89,7 @@ curl -X POST "https://your.hullbay.server/api/projects/<PROJECT_ID>/deploy" \
    -d '{"confirm":true}'
 ```
 
-Remplacez **<PROJECT_ID>** et **<JWT_TOKEN>** par vos valeurs réelles.
+Remplacez **\<PROJECT_ID\>** et **\<JWT_TOKEN\>** par vos valeurs réelles.
 
 ---
 
@@ -123,6 +123,6 @@ Si vous utilisez "Supprimer" sur un projet qui est encore en statut "Deployed", 
 ## Prochaines étapes
 
 Maintenant que vous maîtrisez le flux de base, explorez les guides avancés pour :
-- [Gérer les secrets chiffrés](#guides/secrets-registry)
-- [Ajouter un nouveau serveur au cluster Swarm](#guides/infrastructure)
-- [Comprendre la détection de dérive (Drift)](#Concepts)
+- [Gérer les secrets chiffrés](../guides/secrets-registry)
+- [Ajouter un nouveau serveur au cluster Swarm](../guides/infrastructure)
+- [Comprendre la double source de vérité](../concepts/double-source-de-verite)

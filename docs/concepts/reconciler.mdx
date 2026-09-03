@@ -1,0 +1,35 @@
+# Le cycle du réconcilier
+
+Le déploiement n'est pas un lancement brut de conteneurs. Hullbay applique une logique de planification, validation et exécution.
+
+## 1. Planification
+
+Le moteur compare l'état désiré à l'état réel dans le cluster. Il calcule ensuite les actions à faire :
+
+- `create` : ressource absente et à créer ;
+- `update` : ressource existante mais modifiée ;
+- `noop` : rien à faire ;
+- `remove` : ressource à supprimer.
+
+## 2. Validation
+
+Avant d'exécuter le plan, l'utilisateur le valide dans l'interface. C'est la couche où les erreurs de configuration sont détectées et rassurées avant le lancement effectif.
+
+## 3. Exécution atomique
+
+Le backend applique ensuite les changements sur le cluster à travers une logique planifiée. Cette étape comprend :
+
+- verrouillage d'un déploiement concurrent ;
+- application séquentielle des unités de travail ;
+- gestion explicite des erreurs actionnables ;
+- retour arrière si une étape critique échoue.
+
+## 4. Rôle du cluster et de la dérive
+
+Le reconciler n'est pas qu'un simple script de déploiement. Il sert aussi à corriger la dérive entre l'infra observée et l'infra attendue.
+
+Cela donne à Hullbay une propriété centrale : l'infrastructure reste auditable et peu vulnérable à l'erreur humaine.
+
+:::tip
+Le vrai point fort n'est pas seulement de "déployer" ; c'est de savoir détecter, expliquer, puis corriger les écarts entre ce qui est visé et ce qui tourne réellement.
+:::

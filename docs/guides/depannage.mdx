@@ -1,4 +1,4 @@
-﻿
+
 
 # Dépannage et ressources orphelines
 
@@ -21,3 +21,26 @@ Avant de supprimer quoi que ce soit, consultez la liste des candidats. Cette rou
 
 ```bash
 GET /api/prune
+```
+
+---
+
+## 2. Commandes de diagnostic (CLI)
+
+Si vous avez besoin d'investiguer directement sur le serveur, voici les commandes utiles pour comparer l'état réel du cluster avec ce qui est attendu par Hullbay.
+
+### Lister les services et leurs labels
+
+```bash
+docker service ls --format "{{.ID}}\t{{.Name}}"
+docker service inspect <SERVICE_ID> --format '{{json .Spec.Labels}}'
+```
+
+### Inspecter un conteneur spécifique
+
+```bash
+docker ps --filter "name=<service_name>"
+docker inspect <CONTAINER_ID> --format '{{json .Config.Labels}}'
+```
+
+> **Note :** Les labels clefs utilisés par Hullbay incluent `bozando.projectId`, `bozando.nodeName`, `bozando.spec`, et `bozando.system=true` pour les ressources système. Ces labels agissent comme une source de vérité secondaire.

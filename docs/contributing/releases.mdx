@@ -1,0 +1,44 @@
+# Processus de release
+
+Hullbay applique une logique de publication automatisée basée sur les commits conventionnels et les workflows GitHub Actions.
+
+## 1. Convention de commits
+
+Les releases sont produites à partir d'un historique de commits avec une convention explicite. Cela permet d'automatiser la génération du changelog et d'associer chaque fonctionnalité à un niveau de mise à jour approprié.
+
+## 2. Release-please
+
+Le dépôt cible utilise un système de release automatisée. Le workflow produit des changelogs et des tags à partir des changements soumis dans le dépôt, de façon standardisée.
+
+Cela permet de :
+
+- générer un changelog cohérent ;
+- créer ou mettre à jour les versions de publication ;
+- réduire le risque d'erreur manuelle lors de la sortie d'une release.
+
+## 3. Canal stable vs bêta
+
+Le système expose des canaux distincts :
+
+- `stable` : version de production ;
+- `beta` : version de test ou pré-release.
+
+Ce mécanisme est utile pour la mise à jour de l'instance, en particulier pour les opérations de validation des versions à venir.
+
+## 4. Checklist avant release
+
+Avant publication, le dépôt attend :
+
+- validation locale du typecheck ;
+- build backend ;
+- build frontend ;
+- validation i18n ;
+- test de régression sur les modules sensibles.
+
+## 5. Ce que cela apporte
+
+La publication n'est pas seulement un tag Git : c'est un contrôle de qualité et une montée de version avec historique et traçabilité.
+
+:::info
+Le principe de release automatique est important pour la documentation, parce qu'il permet d'alimenter la page de changelog à partir d'un objet unique de vérité, plutôt que de maintenir à la main une page qui finit par diverger du produit réel.
+:::

@@ -1,80 +1,112 @@
 export const docFiles = {
   'introduction/Pourquoi-hullbay': () => import('../../docs/introduction/Pourquoi-hullbay.mdx?raw'),
+  'introduction/architecture': () => import('../../docs/introduction/architecture.mdx?raw'),
+  'introduction/comparatif': () => import('../../docs/introduction/comparatif.mdx?raw'),
+
   'getting-started/installation': () => import('../../docs/getting-started/installation.mdx?raw'),
   'getting-started/premier-projet': () => import('../../docs/getting-started/premier-projet.mdx?raw'),
-  'Concepts': () => import('../../docs/Concepts.mdx?raw'),
+  'getting-started/ajouter-base-de-donnees': () => import('../../docs/getting-started/ajouter-base-de-donnees.mdx?raw'),
+  'getting-started/multi-noeud': () => import('../../docs/getting-started/multi-noeud.mdx?raw'),
+
+  'concepts/double-source-de-verite': () => import('../../docs/concepts/double-source-de-verite.mdx?raw'),
+  'concepts/types-de-noeuds': () => import('../../docs/concepts/types-de-noeuds.mdx?raw'),
+  'concepts/reconciler': () => import('../../docs/concepts/reconciler.mdx?raw'),
+  'concepts/multi-cluster': () => import('../../docs/concepts/multi-cluster.mdx?raw'),
+
   'guides/deploiement': () => import('../../docs/guides/deploiement.mdx?raw'),
   'guides/infrastructure': () => import('../../docs/guides/infrastructure.mdx?raw'),
+  'guides/base-de-donnees': () => import('../../docs/guides/base-de-donnees.mdx?raw'),
   'guides/secrets-registry': () => import('../../docs/guides/secrets-registry.mdx?raw'),
+  'guides/mise-a-jour-instance': () => import('../../docs/guides/mise-a-jour-instance.mdx?raw'),
   'guides/depannage': () => import('../../docs/guides/depannage.mdx?raw'),
+  'guides/observabilite': () => import('../../docs/guides/observabilite.mdx?raw'),
+  'guides/maintenance': () => import('../../docs/guides/maintenance.mdx?raw'),
+
   'security/security-overview': () => import('../../docs/security/security-overview.mdx?raw'),
   'security/rbac': () => import('../../docs/security/rbac.mdx?raw'),
   'security/secrets': () => import('../../docs/security/secrets.mdx?raw'),
   'security/docker-socket': () => import('../../docs/security/docker-socket.mdx?raw'),
-  'api/api-reference': () => import('../../docs/api/api-reference.mdx?raw'),
+  'security/audit-logs': () => import('../../docs/security/audit-logs.mdx?raw'),
+
+  'reference/api-reference': () => import('../../docs/reference/api-reference.mdx?raw'),
+  'reference/variables-environnement': () => import('../../docs/reference/variables-environnement.mdx?raw'),
+  'reference/codes-erreur': () => import('../../docs/reference/codes-erreur.mdx?raw'),
+
+  'contributing/setup': () => import('../../docs/contributing/setup.mdx?raw'),
+  'contributing/standards': () => import('../../docs/contributing/standards.mdx?raw'),
+  'contributing/architecture-conventions': () => import('../../docs/contributing/architecture-conventions.mdx?raw'),
+  'contributing/releases': () => import('../../docs/contributing/releases.mdx?raw'),
+
   'faq/faq': () => import('../../docs/faq/faq.mdx?raw'),
   'ads/changelog': () => import('../../docs/ads/changelog.mdx?raw'),
-  //'contributing/setup': () => import('../../docs/contributing/setup.mdx?raw'),
-  //'contributing/standards': () => import('../../docs/contributing/standards.mdx?raw'),
-  'internal/architecture': () => import('../../docs/internal/architecture.mdx?raw'),
 };
 
 export const sidebarConfig = [
   {
     title: "INTRODUCTION",
     items: [
-      { id: "introduction/Pourquoi-hullbay", label: "Pourquoi Hullbay ?" }
+      { id: "introduction/Pourquoi-hullbay", label: "Qu'est-ce que Hullbay ?" },
+      { id: "introduction/comparatif", label: "Comparatif" }
     ]
   },
   {
-    title: "GETTING STARTED",
+    title: "DÉMARRAGE",
     items: [
       { id: "getting-started/installation", label: "Installation & Prérequis" },
-      { id: "getting-started/premier-projet", label: "Créer votre premier projet" }
+      { id: "getting-started/premier-projet", label: "Premier projet" },
+      { id: "getting-started/ajouter-base-de-donnees", label: "Ajouter une base de données" },
+      { id: "getting-started/multi-noeud", label: "Étendre sur plusieurs nœuds" }
     ]
   },
   {
-    title: "CORE CONCEPTS",
+    title: "CONCEPTS",
     items: [
-      { id: "Concepts", label: "Concepts Fondamentaux" }
+      { id: "concepts/double-source-de-verite", label: "Double source de vérité" },
+      { id: "concepts/types-de-noeuds", label: "Les 5 types de nœuds" },
+      { id: "concepts/reconciler", label: "Cycle du réconcilier" },
+      { id: "concepts/multi-cluster", label: "Multi-cluster" }
     ]
   },
   {
     title: "GUIDES",
     items: [
       { id: "guides/deploiement", label: "Déployer un projet" },
-      { id: "guides/infrastructure", label: "Infrastructure & Serveurs" },
-      { id: "guides/secrets-registry", label: "Secrets & Registry" },
+      { id: "guides/infrastructure", label: "Gérer l'infrastructure" },
+      { id: "guides/base-de-donnees", label: "Configurer une base de données" },
+      { id: "guides/secrets-registry", label: "Secrets et registres Docker" },
+      { id: "guides/mise-a-jour-instance", label: "Mettre à jour l'instance" },
       { id: "guides/depannage", label: "Dépannage" }
     ]
   },
   {
-    title: "SECURITY",
+    title: "SÉCURITÉ",
     items: [
       { id: "security/security-overview", label: "Vue d'ensemble" },
-      { id: "security/rbac", label: "RBAC & Permissions" },
-      { id: "security/secrets", label: "Chiffrement & Secrets" },
-      { id: "security/docker-socket", label: "Socket Docker" }
+      { id: "security/rbac", label: "RBAC & permissions" },
+      { id: "security/secrets", label: "Secrets et chiffrement" },
+      { id: "security/docker-socket", label: "Protection du socket Docker" }
     ]
   },
   {
-    title: "API REFERENCE",
+    title: "RÉFÉRENCE",
     items: [
-      { id: "api/api-reference", label: "API complète" }
+      { id: "reference/api-reference", label: "Référence API" },
+      { id: "reference/variables-environnement", label: "Variables d'environnement" },
+      { id: "reference/codes-erreur", label: "Codes d'erreur" }
     ]
   },
-  /*
   {
-    title: "CONTRIBUTING",
+    title: "CONTRIBUER",
     items: [
-      { id: "contributing/setup", label: "Configuration & Setup" },
-      { id: "contributing/standards", label: "Standards de Code" }
+      { id: "contributing/setup", label: "Mise en place" },
+      { id: "contributing/standards", label: "Standards & tests" },
+      { id: "contributing/architecture-conventions", label: "Conventions d'architecture" },
+      { id: "contributing/releases", label: "Processus de release" }
     ]
-  },*/
+  },
   {
-    title: "INTERNAL & FAQ",
+    title: "DIVERS",
     items: [
-      { id: "internal/architecture", label: "Architecture Interne" },
       { id: "faq/faq", label: "FAQ" },
       { id: "ads/changelog", label: "Changelog" }
     ]

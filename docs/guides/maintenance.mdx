@@ -1,0 +1,48 @@
+# Maintenance & Mises à jour
+
+Maintenir votre instance Hullbay à jour est un processus simple et pensé pour être sans interruption majeure. Le script d'installation officiel est conçu pour être **idempotent**, ce qui signifie qu'il peut être relancé en toute sécurité sur une instance existante pour la mettre à niveau.
+
+---
+
+## Mettre à jour l'instance Hullbay
+
+Pour appliquer la dernière version de Hullbay, il suffit de re-télécharger et de relancer le script d'installation :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh | sudo bash
+```
+
+### Ce que fait le script lors d'une mise à jour :
+1. **Pull des nouvelles images** : Il télécharge les dernières versions des images Docker (API et Web) depuis le GitHub Container Registry.
+2. **Re-déploiement de la stack** : Il applique la nouvelle configuration de `docker-compose.prod.yml`.
+3. **Conservation des données** : Les volumes persistants (Base de données PostgreSQL, Redis) sont préservés. Vos projets, comptes et configurations restent intacts.
+4. **Conservation des secrets** : Le fichier `.env` généré lors de la première installation n'est **jamais écrasé**.
+
+> **Note :** Pendant le re-déploiement de la stack système (quelques secondes), le dashboard de Hullbay sera indisponible. Cependant, **les projets que vous avez déployés (vos conteneurs Swarm) ne subiront aucune coupure**, car Hullbay s'exécute indépendamment des services qu'il gère (Control Plane séparé du Data Plane).
+
+---
+
+## Mise à jour depuis l'interface (Canaux de publication)
+
+Hullbay intègre un vérificateur de mises à jour directement dans l'interface d'administration (section **Mises à jour**). Le système scanne les *releases* publiées sur GitHub pour vous proposer les nouvelles versions.
+
+### Les Canaux de diffusion
+
+Vous pouvez choisir le niveau de stabilité de votre instance en basculant entre différents canaux via le **bouton "Version bêta"** dans le header de la page des mises à jour :
+
+- **Canal Stable (Défaut)** : Ce canal ne propose que les versions officielles et validées pour la production (ex: `1.2.4`). C'est le choix recommandé pour les environnements critiques.
+- **Canal Bêta / RC** : En activant ce canal, l'interface vous proposera également les *pre-releases* (ex: `1.2.5-beta.1` ou `1.3.0-rc.2`). Utile pour tester les nouvelles fonctionnalités en avant-première dans un environnement de staging.
+
+> **Règle de versioning (SemVer) :** Le système de Hullbay est intelligent. Même si vous êtes sur le canal Bêta, si une version *Stable* plus récente est publiée (ex: `1.3.0`), elle primera toujours sur les anciennes versions Bêta. 
+
+Lorsqu'une mise à jour est détectée dans votre canal sélectionné, un indicateur visuel apparaît, et vous pouvez suivre les instructions pour déclencher la montée de version de votre instance.
+
+---
+
+## Sauvegarde (Backup)
+
+La source de vérité principale de Hullbay réside dans la base de données PostgreSQL et le fichier `.env` (qui contient les clés de chiffrement).
+
+Pour sauvegarder votre instance :
+1. Sauvegardez le répertoire d'installation (par défaut `/opt/hullbay`).
+2. Faites un dump régulier de la base de données PostgreSQL (conteneur `hullbay_postgres_1`).
