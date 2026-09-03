@@ -1,0 +1,48 @@
+# Variables d'environnement
+
+Hullbay s'appuie sur un fichier `.env` de configuration pour gérer les secrets, les URLs, et les paramètres critiques de l'instance.
+
+## 1. Variables essentielles
+
+Le dépôt cible fournit un `.env.template` commenté qui couvre les éléments suivants :
+
+- `DATABASE_URL` : point de connexion PostgreSQL ;
+- `REDIS_URL` : connexion Redis ;
+- `JWT_SECRET` : signature des tokens d'authentification ;
+- `MFA_ENCRYPTION_KEY` : chiffrement des données relatives à la MFA ;
+- `PUBLIC_HOST` : nom de domaine public / hôte de publication ;
+- `IMAGE_TAG` : tag des images Docker utilisées ;
+- `GHCR_OWNER` : propriétaire des images GitHub Container Registry.
+
+## 2. Sécurité
+
+Les variables suivantes sont particulièrement sensibles :
+
+- `JWT_SECRET`
+- `MFA_ENCRYPTION_KEY`
+- toute clé SSH ou tout secret de registre
+
+Le dépôt insiste sur le fait qu'elles doivent être sauvegardées hors du serveur, car leur perte rendrait les tokens invalides ou empêcherait de déchiffrer les secrets stockés.
+
+## 3. Exemple de configuration
+
+```bash
+DATABASE_URL=postgresql://ops:change-me-strong@localhost/hullbay
+REDIS_URL=redis://localhost:6379
+JWT_SECRET=change-me-64-hex
+MFA_ENCRYPTION_KEY=change-me-64-hex
+PUBLIC_HOST=ops.example.com
+GHCR_OWNER=fotetsa
+IMAGE_TAG=latest
+```
+
+## 4. Bonnes pratiques
+
+- ne versionnez jamais le `.env` réel ;
+- utilisez des valeurs aléatoires fortes ;
+- changez les secrets uniquement pendant une fenêtre de maintenance planifiée ;
+- vérifiez la présence de la clé MFA avant d'exposer l'instance en production.
+
+:::warning
+Les secrets de Hullbay ne sont pas de simples paramètres : ce sont des éléments de sécurité critiques de l'infrastructure. Leur perte ou leur rotation inadaptée peut rendre l'instance non exploitable.
+:::

@@ -1,0 +1,67 @@
+# Comparatif : pourquoi Hullbay est différent
+
+Hullbay n'est ni une simple interface Kafka pour Docker Compose, ni un Kubernetes abstrait. C'est un plan d'opérations visuel pour des équipes qui doivent faire évoluer des services dans un environnement Docker Swarm, sans dépendre d'une commande shell à chaque modification.
+
+## 1. Comparatif rapide
+
+| Outil | Point fort | Limite pour les équipes infra |
+| --- | --- | --- |
+| Docker CLI | très simple, très rapide | pas de plan lisible, pas de revue, pas de traçabilité |
+| Docker Compose | praticable pour des stacks simples | faible pour les clusters multi-nœuds, pas de gestion de drift |
+| Kubernetes | robuste et standardisé | trop lourd pour des équipes qui veulent des opérations visuelles et rapides |
+| Hullbay | canvas + plan + validation + orchestration | demande un usage orienté plateforme/ops |
+
+## 2. Hullbay vs Docker CLI
+
+La commande Docker est excellente pour un événement ponctuel, mais elle ne documente pas les intentions de l'infra. Hullbay inverse cette logique : 
+
+- vous dessinez l'architecture ;
+- le moteur produit un plan de changements ;
+- vous validez avant d'exécuter ;
+- le reconciler compare ensuite l'état réel au désiré.
+
+C'est la différence entre "exécuter une commande" et "gérer un système d'infrastructure de manière auditée".
+
+## 3. Hullbay vs Kubernetes
+
+Kubernetes est excellent pour les équipes qui ont déjà un opérateur dédié et un coût d'ops élevé. Hullbay vise un objectif plus direct : réduire la friction pour des équipes qui doivent simplement "déployer et revoir" sur des serveurs Docker Swarm.
+
+Les points forts de Hullbay :
+
+- notion visuelle du graphe de services ;
+- validation des liens (réseaux, volumes, gateways) avant application ;
+- instructions de déploiement lisibles comme un plan d'action ;
+- support multi-cluster et multi-serveur dans une même instance.
+
+## 4. Hullbay vs PaaS SaaS
+
+Les plateformes SaaS de type PaaS offrent souvent un niveau d'abstraction élevé, mais elles imposent une mentalité "cloud managed". Hullbay adopte une approche self-hosted et opérateur-friendly :
+
+- les serveurs sont vos ressources ;
+- les secrets et les clés SSH sont gérés de façon explicite ;
+- l'API ne monte pas le socket Docker directement ;
+- la sécurité et l'audit sont des composants de conception, pas des modules optionnels.
+
+Cette approche est adaptée aux équipes qui veulent garder le contrôle de leur infrastructure, tout en évitant la fragilité des procédures manuelles.
+
+## 5. Ce que Hullbay apporte réellement
+
+Le vrai avantage n'est pas seulement le canvas. C'est la combinaison suivante :
+
+1. un état désiré explicite ;
+2. un plan de changement lisible ;
+3. une validation avant exécution ;
+4. un reconciler qui répare la dérive ;
+5. une sécurité built-in avec MFA, RBAC et audit logs.
+
+:::tip
+Si vous connaissez Docker mais pas le concept de "desired state", Hullbay est le point d'entrée le plus simple pour comprendre cette manière de piloter des services de manière sûre.
+:::
+
+---
+
+## 6. À retenir
+
+Hullbay ne cherche pas à remplacer Docker. Il cherche à rendre Docker gérable à l'échelle d'une plateforme ops, en un seul endroit.
+
+C'est cette promesse qui justifie les nouveaux modules de documentation : base de données HA, multi-cluster, mises à jour d'instance, sécurité et opérabilité.

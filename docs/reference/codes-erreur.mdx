@@ -1,0 +1,59 @@
+# Codes d'erreur et diagnostics
+
+Hullbay s'appuie sur des codes HTTP explicites, combinés à des erreurs de validation structurées, afin qu'un opérateur sache immédiatement ce qui a bloqué le système.
+
+## 1. Codes HTTP courants
+
+| Code | Signification | Exemple de cause |
+| --- | --- | --- |
+| **400** | Requête invalide | payload JSON invalide ou configuration absente |
+| **401** | Non authentifié | JWT absent, invalide ou expiré |
+| **403** | Interdit | rôle insuffisant ou MFA non activée |
+| **404** | Introuvable | ressource ou cluster absent |
+| **409** | Conflit | déploiement déjà en cours |
+| **422** | Unprocessable | image non trouvée, secret absent, erreur de plan |
+| **500** | Erreur serveur | panne interne du backend |
+
+## 2. Schéma des erreurs
+
+Les erreurs de validation suivent souvent un format structuré :
+
+```json
+{
+  "statusCode": 400,
+  "error": "Validation echouee",
+  "details": {
+    "email": ["Invalid email"]
+  }
+}
+```
+
+## 3. Diagnostic rapide
+
+### Token ou session invalide
+
+- vérifier le JWT ;
+- vérifier la date d'expiration ;
+- vérifier l'audience ou le contexte de session.
+
+### Droits insuffisants
+
+- contrôler le rôle utilisateur ;
+- vérifier si la MFA est activée ;
+- confirmer que l'opération cible le bon périmètre.
+
+### Erreur lors d'un déploiement
+
+- ouvrir le plan généré ;
+- vérifier les liens réseau, gateway et secrets ;
+- contrôler la présence de l'image demandée et des dépendances nécessaires.
+
+## 4. Bonnes pratiques
+
+- ne pas masquer les erreurs de validation sous des 500 ;
+- conserver un historique des opérations pour corréler les erreurs ;
+- tracer les exceptions avec l'identifiant de la ressource ou du cluster concerné.
+
+:::tip
+Dans un système d'infrastructure visuelle comme Hullbay, les erreurs ne sont pas simplement des messages. Elles reflètent un écart entre l'état attendu et l'état réel. Le rôle du produit est de les rendre lisibles et corrigibles avant qu'ils ne deviennent coûteux.
+:::

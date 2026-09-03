@@ -1,0 +1,59 @@
+# Mettre à jour l'instance Hullbay
+
+Le système de mises à jour de Hullbay permet de mettre à jour l'instance sans passer par une procédure SSH manuelle. La page de mise à jour centralise la vérification de version, le lancement de la mise à jour, le suivi du déploiement et le rollback en cas de besoin.
+
+## 1. Accéder à la page
+
+L'owner de l'instance accède à la section `Mises à jour` dans la navigation. La page affiche la version installée, le canal actif (`stable` ou `beta`) et la version la plus récente disponible.
+
+## 2. Canal stable vs bêta
+
+Le canal par défaut est `stable`. Si vous activez le mode bêta, Hullbay propose les versions candidates ou pré-release.
+
+Le système se base sur les conventions de versionnement semver pour comparer correctement les versions et faire la distinction entre stable et pré-release.
+
+## 3. Lancer une mise à jour
+
+1. Ouvrez la page `Mises à jour`.
+2. Vérifiez la version cible proposée.
+3. Confirmez la mise à jour.
+
+Le backend exécute alors la séquence suivante :
+
+- sauvegarde PostgreSQL ;
+- téléchargement des images Docker ;
+- mise à jour des services web puis API ;
+- finalisation dynamique de l'état après redémarrage de l'API.
+
+## 4. Rollback automatique et manuel
+
+Un des points forts du produit est la présence d'un rollback explicite :
+
+- un rollback manuel est possible pour une mise à jour réussie ;
+- un rollback automatique se déclenche si la version ciblée ne devient pas opérationnelle ;
+- le système restaure le dump préalable avant de revenir à la version précédente.
+
+Cela fait de Hullbay un système beaucoup plus robuste que des mises à jour "à l'ancienne" qui ne font que remplacer un conteneur sans validation.
+
+## 5. Ce que l'historique montre
+
+La page d'historique garde une trace :
+
+- version de départ ;
+- version cible ;
+- statut de l'opération ;
+- temps d'exécution ;
+- message d'erreur éventuel.
+
+Les statuts typiques sont : `pending`, `running`, `success`, `failed` et `rolled_back`.
+
+## 6. Recommandations
+
+- gardez le canal `stable` lors des mises à jour de production ;
+- n'utilisez le canal bêta que pour tester des versions candidates ;
+- vérifiez les snapshots de base avant chaque mise à jour importante ;
+- surveillez l'historique de l'instance après chaque changement.
+
+:::warning
+La mise à jour d'une instance Hullbay est une opération critique. Elle ne doit pas être traitée comme une simple mise à jour de service applicatif : elle touche le cœur de l'outil et les données opérationnelles associées.
+:::
