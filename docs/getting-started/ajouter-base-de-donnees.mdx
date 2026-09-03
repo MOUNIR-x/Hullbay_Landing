@@ -1,0 +1,104 @@
+# Ajouter une base de données à votre projet
+
+Le nœud de base de données est l'une des fonctionnalités les plus visibles de Hullbay : il permet d'ajouter une vraie source de données à un projet, sans sortir du canvas ni écrire de Docker Compose à la main.
+
+## 1. Pourquoi ce nœud est spécial
+
+Le canvas ne se limite pas aux conteneurs, réseaux et gateways. Hullbay supporte également un 5e type de nœud : `database`.
+
+Cela signifie que vous pouvez :
+
+- brancher un service applicatif sur une base de données ;
+- choisir un mode simple ou HA ;
+- injecter automatiquement les variables de connexion dans le conteneur ;
+- laisser le moteur gérer la topology de la base au moment du déploiement.
+
+## 2. Ajouter un nœud base de données
+
+1. Ouvrez un projet dans le canvas.
+2. Sélectionnez le menu d'ajout de nœud.
+3. Choisissez le type `database`.
+4. Sélectionnez le moteur de base de données souhaité : PostgreSQL, MySQL, MongoDB, Redis, etc.
+5. Choisissez le mode :
+   - `single` pour le développement ou la petite charge ;
+   - `ha` pour la production avec réplication et consensus.
+
+Une fois créé, le nœud de base de données s'affiche avec son état et les points de connexion attendus.
+
+## 3. Connecter votre application
+
+La logique est la même que pour les autres liens du canvas :
+
+- vous reliez le service applicatif au nœud database ;
+- Hullbay infère la relation et valide le type de bordure ;
+- le backend injecte automatiquement les variables d'environnement utiles dans le service.
+
+Les variables typiques sont :
+
+- `DATABASE_HOST`
+- `DATABASE_PORT`
+- `DATABASE_USER`
+- `DATABASE_NAME`
+- `DATABASE_PASSWORD`
+- `DATABASE_URL`
+
+Le but est de faire passer l'application du stade "config d'infra manuelle" à "service prêt à démarrer avec des informations correctes".
+
+## 4. Mode simple vs mode HA
+
+### Mode simple
+
+Le mode simple est bien adapté à :
+
+- l'environnement de développement ;
+- les projets peu sollicités ;
+- les démonstrations et tests.
+
+Il fonctionne avec un unique point de données, et les variables injectées restent simples.
+
+### Mode HA
+
+Le mode HA est conçu pour la production. Il repose sur une topologie distribuée avec réplica(s) et consensus :
+
+- plusieurs nœuds de base et réplica ;
+- système de leader/follower selon le moteur ;
+- meilleure tolérance aux pannes et résilience de service.
+
+Le dépôt cible documente explicitement un mode PostgreSQL HA basé sur Patroni, ce qui en fait l'un des points forts réellement différenciants de Hullbay.
+
+## 5. Exemple concret
+
+Un projet web peut être dessiné ainsi :
+
+- `web` (container)
+- connecté en `database` à `postgres`
+- exposé via `gateway` sur le domaine public
+
+Le moteur publie ensuite un plan de déploiement qui inclut :
+
+- le service applicatif ;
+- le réseau interne ;
+- les secrets ou variables de connexion ;
+- le nœud de base ;
+- les ressources de coordination nécessaires en mode HA.
+
+## 6. Bonnes pratiques
+
+- utilisez le mode simple pour les premiers tests ;
+- passez en mode HA dès que le service est critique pour le business ;
+- répartissez les replicas sur des nœuds distincts ;
+- vérifiez toujours l'état de santé des services avant de considérer la base comme opérationnelle.
+
+:::warning
+Le dossier de test du dépôt identifie un point important : la base HA est un élément fonctionnel majeur, mais la partie PostgreSQL HA nécessite une implémentation correcte et une validation de production. L'usage en prod doit donc être accompagné d'un contrôle explicite de la santé des replicas et du leader.
+:::
+
+---
+
+## 7. Prochaine étape
+
+Une fois votre base ajoutée, vous pouvez :
+
+- passer au guide [Déployer et gérer un projet](../guides/deploiement.mdx) ;
+- lire le guide détaillé [Configurer une base de données](../guides/base-de-donnees.mdx) ;
+- ou étendre votre architecture sur plusieurs serveurs avec [Multi-nœud](./multi-noeud.mdx).

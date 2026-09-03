@@ -1,0 +1,34 @@
+# Observabilité & Santé
+
+Hullbay intègre un système d'observabilité en temps réel conçu pour vous donner une vision immédiate et claire de l'état de votre infrastructure Docker Swarm, sans nécessiter la mise en place d'outils externes lourds (comme Prometheus/Grafana) pour les besoins de base.
+
+---
+
+## 1. Dashboard de Santé (Health View)
+
+Le dashboard d'observabilité est la tour de contrôle de votre infrastructure. Il regroupe les informations vitales de tous vos nœuds et services.
+
+### Informations remontées en temps réel :
+- **État des nœuds (Nodes)** : Statut Manager/Worker, accessibilité (Reachability), et disponibilité (Active/Drain/Pause).
+- **Consommation des ressources (CPU/RAM)** : Surveillance globale de l'empreinte matérielle pour anticiper les besoins d'évolution verticale (scale-up).
+- **Santé des services** : Identification rapide des conteneurs qui redémarrent en boucle (CrashLoopBackOff) ou qui échouent à démarrer (OOMKilled).
+
+---
+
+## 2. Détection de dérive (Drift Detection)
+
+L'une des fonctionnalités phares de Hullbay est son **moteur de réconciliation**. 
+
+Le système compare en continu l'**État Désiré** (ce qui est dessiné dans votre Canvas) avec l'**État Réel** (ce qui tourne sur Swarm). S'il détecte une anomalie (un conteneur supprimé manuellement, un changement de tag d'image effectué en dehors de Hullbay), la dérive est signalée sur l'interface.
+
+Vous pouvez alors choisir de :
+- **Re-déployer** pour forcer l'état réel à correspondre au canvas.
+- **Ignorer** si la modification était volontaire et temporaire.
+
+---
+
+## 3. Gestion des ressources orphelines
+
+Le cycle de vie de Docker Swarm peut parfois laisser des "artefacts" (réseaux non utilisés, volumes détachés). Hullbay intègre un outil de nettoyage (Prune) accessible depuis l'interface, qui identifie de façon sécurisée les ressources qui n'appartiennent à aucun projet Hullbay et propose de les supprimer pour libérer de l'espace.
+
+> **Note de sécurité :** Le système est immunisé contre l'auto-démantèlement. Les conteneurs système de Hullbay (marqués avec `bozando.system=true`) sont systématiquement ignorés par l'outil de nettoyage.

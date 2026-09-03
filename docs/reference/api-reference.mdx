@@ -1,0 +1,92 @@
+# Référence API
+
+Cette page donne une vue d'ensemble de l'API REST de Hullbay. L'objectif est de donner un point d'entrée fiable, sans répéter la totalité des détails de chaque endpoint dans la prose.
+
+## 1. Base URL
+
+```text
+/api
+```
+
+En développement, les appels sont généralement exposés depuis le backend local sur `http://127.0.0.1:4000`.
+
+## 2. Authentification
+
+La plupart des endpoints nécéssitent un JWT dans le header :
+
+```bash
+curl -H "Authorization: Bearer <token>" http://127.0.0.1:4000/api/projects
+```
+
+## 3. Modules principaux
+
+### Auth
+
+- `POST /api/auth/bootstrap` : initialise le premier owner.
+- `POST /api/auth/login` : authentifie un utilisateur.
+- `GET /api/auth/me` : retourne le profil courant.
+- `POST /api/auth/mfa/enroll` : initie l'enrôlement MFA.
+- `POST /api/auth/mfa/confirm` : confirme la validation MFA.
+
+### Projets et canvas
+
+- `GET /api/projects` : liste les projets.
+- `GET /api/projects/:id` : détail du projet.
+- `POST /api/projects` : création d'un projet.
+- `GET /api/projects/:id/plan` : calcul du plan de reconciliation.
+- `POST /api/projects/:id/deploy` : exécute le plan.
+- `POST /api/projects/:id/destroy` : détruit les ressources du projet.
+
+### Clusters
+
+- `GET /api/clusters` : liste des clusters connus.
+- `GET /api/clusters/:id` : détail d'un cluster.
+- `POST /api/clusters` : création ou inscription d'un cluster.
+
+### Base de données
+
+- `POST /api/database` : crée une ressource de base de données ;
+- `GET /api/database/:id` : détail de la base ;
+- `PATCH /api/database/:id` : mise à jour de la configuration ;
+- `DELETE /api/database/:id` : destruction d'une base.
+
+### Mises à jour
+
+- `GET /api/updates/check` : vérifie si une mise à jour est disponible ;
+- `GET /api/updates/history` : historique des opérations ;
+- `POST /api/updates/apply` : déclenche une mise à jour ;
+- `POST /api/updates/:id/rollback` : retour arrière ;
+- `PUT /api/updates/channel` : active le canal `stable` ou `beta`.
+
+### Secrets et registres
+
+- `GET /api/secrets` : liste les secrets ;
+- `POST /api/secrets` : crée un secret ;
+- `GET /api/registry` : donne le statut des registres configurés ;
+- `POST /api/integrations` : ajoute un registre ou un intégration utilisateur.
+
+## 4. Codes d'erreur courants
+
+La plupart des erreurs de validation ou d'autorisation sont renvoyées avec un code HTTP explicite :
+
+- `400` : validation invalide ;
+- `401` : token manquant ou invalide ;
+- `403` : droits insuffisants ou MFA manquante ;
+- `404` : ressource introuvable ;
+- `409` : conflit de fonctionnement ;
+- `422` : erreur actionnable lors de l'exécution.
+
+## 5. WebSocket et événements
+
+Hullbay expose un canal temps réel permettant de suivre les événements de déploiement et les mises à jour. L'objectif est d'avoir une boucle "plan → validation → exécution → état" entièrement visible par l'ops.
+
+## 6. Bonnes pratiques d'appel
+
+- ne pas construire de `/api` sans token quand l'endpoint exige un rôle ;
+- toujours valider le plan avant `deploy` ;
+- ne pas utiliser les endpoints de destruction sans vérification préalable ;
+- consulter les codes d'erreur et le journal d'audit en cas d'échec.
+
+:::tip
+La référence API de Hullbay est utile pour l'intégration technique, mais ce qui rend le produit solide est le fait que l'API s'appuie sur un modèle de planification explicite et sur une gouvernance de sécurité claire.
+:::

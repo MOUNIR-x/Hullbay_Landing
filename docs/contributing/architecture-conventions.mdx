@@ -1,0 +1,50 @@
+# Conventions d'architecture
+
+Cette page décrit les conventions internes de Hullbay, en particulier le modèle de modules et la règle de gestion des événements.
+
+## 1. Organisation du monorepo
+
+Le code est structuré autour de plusieurs packages :
+
+- `packages/shared` : définitions et validation partagées ;
+- `packages/api` : backend Fastify / orchestration ;
+- `packages/web` : interface utilisateur.
+
+Le package partagé est l'élément central : les schémas de projet, de nœud, d'arête et des règles de validation sont définis là, puis réutilisés par le backend et le frontend.
+
+## 2. Subscribers et événements
+
+L'un des principes clés du dépôt est la séparation entre :
+
+- modules de logique métier ;
+- subscribers qui réagissent à des événements ;
+- orchestrations globales de l'état de système.
+
+Cela évite qu'un module importe directement les dépendances d'un autre pour réagir à ses propres événements, ce qui crée des cycles et une forte fragilité.
+
+## 3. Principe : les événements passent par un centre de coordination
+
+Le design du dépôt tend à centraliser les handlers d'événements dans des fichiers de subscribers dédiés. Cela évite qu'un module tente de dépendre d'un autre "en aval" et crée ainsi des dépendances circulaires.
+
+## 4. Validation frontière
+
+Les modules de type `projects`, `servers`, `database` ou `updates` doivent se baser sur :
+
+- des schémas de validation partagés ;
+- des régles de sécurité roles-based ;
+- des événements clairs entre modules.
+
+## 5. Règle de prudence
+
+Lorsqu'une modification touche un type partagé, elle doit être pensée comme un changement global :
+
+- API ;
+- web ;
+- validation des différents modules ;
+- tests de régression.
+
+Cette règle est essentielle dans un système dont le cœur est un graphe de ressources et des schémas de config profondément interconnectés.
+
+:::tip
+Le point invisible mais fondamental dans Hullbay est que l'architecture sert la sûreté de l'opération. Les modules ne sont pas seulement des dossiers : ce sont des frontières de responsabilité que l'on ne doit pas franchir sans réfléchir.
+:::

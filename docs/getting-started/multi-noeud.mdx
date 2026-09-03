@@ -1,0 +1,75 @@
+# Étendre votre infrastructure sur plusieurs nœuds
+
+Hullbay n'est pas limité à un seul serveur. Le mécanisme de provisioning du produit est conçu pour gérer un cluster Swarm multi-nœuds, que ce soit pour du scale horizontal ou pour de la haute disponibilité.
+
+## 1. Modèle de cluster
+
+Quand vous lancez un premier serveur, il devient le point d'entrée du cluster. Les serveurs suivants peuvent ensuite être ajoutés comme :
+
+- `manager` pour le contrôle du cluster ;
+- `worker` pour l'exécution des services applicatifs ;
+- éventuellement `database` ou `consensus` selon les composants de la topologie.
+
+La logique backend utilise un flux de provisionnement SSH qui ajoute le nœud au cluster Swarm et enregistre la machine dans l'instance Hullbay.
+
+## 2. Ajouter un serveur
+
+Le flux de travail fonctionne ainsi :
+
+1. Accédez à la section des serveurs dans l'UI.
+2. Choisissez `Ajouter un serveur`.
+3. Renseignez :
+   - nom logique du serveur ;
+   - hôte / IP ;
+   - port SSH ;
+   - utilisateur distant ;
+   - rôle (manager ou worker).
+4. Confirmez le provisionnement.
+
+Le backend lance ensuite la procédure de connexion sécurisée, installe Docker si nécessaire, rejoint le cluster Swarm et enregistre la machine.
+
+## 3. Ce que Hullbay sait gérer
+
+Dans ce cadre, le produit est capable de :
+
+- répartir les services sur plusieurs nœuds ;
+- détecter les dérives de placement ;
+- surveiller la santé du cluster ;
+- travailler avec des topologies multi-serveurs en parallèle.
+
+L'objectif n'est pas seulement d'ajouter des machines, mais de maintenir un état désiré cohérent sur plusieurs hôtes.
+
+## 4. Cas d'usage typiques
+
+### Développement local
+
+Un seul nœud suffit pour les tests rapides.
+
+### Préproduction
+
+Deux ou trois serveurs permettent d'ouvrir le questionnement de la tolérance aux pannes et de la réplication.
+
+### Production
+
+Le modèle de production prévoit un quorum de managers impair, avec des workers pour l'exécution des services et de possibles nœuds de base de données en mode HA.
+
+## 5. Bonnes pratiques
+
+- gardez un nombre impair de managers ;
+- placez les composants critiques sur des nœuds distincts ;
+- ne mélangez pas trop les charges sur un seul worker ;
+- vérifiez la page de santé avant de passer en production.
+
+:::info
+Les serveurs ne sont pas seulement des machines : ce sont des unités de placement pour les services, le quorum et les composants de base de données. Le multi-nœud n'est donc pas un détail d'architecture ; c'est une partie centrale du modèle d'exploitation de Hullbay.
+:::
+
+---
+
+## 6. Prochaine étape
+
+Pour aller plus loin :
+
+- consultez le guide [Gestion de l'infrastructure](../guides/infrastructure.mdx) ;
+- lisez le guide détaillé [Configurer une base de données](../guides/base-de-donnees.mdx) ;
+- ou approfondissez le concept de [Multi-cluster](../concepts/multi-cluster.mdx).
