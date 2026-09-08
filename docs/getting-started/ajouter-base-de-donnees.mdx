@@ -4,7 +4,7 @@ Le nœud de base de données est l'une des fonctionnalités les plus visibles de
 
 ## 1. Pourquoi ce nœud est spécial
 
-Le canvas ne se limite pas aux conteneurs, réseaux et gateways. Hullbay supporte également un 5e type de nœud : `database`.
+Le canvas ne se limite pas aux conteneurs, réseaux et gateways. Hullbay supporte également un 5e type de nœud : **database**.
 
 Cela signifie que vous pouvez :
 
@@ -17,13 +17,14 @@ Cela signifie que vous pouvez :
 
 1. Ouvrez un projet dans le canvas.
 2. Sélectionnez le menu d'ajout de nœud.
-3. Choisissez le type `database`.
+3. Choisissez le type **database**.
 4. Sélectionnez le moteur de base de données souhaité : PostgreSQL, MySQL, MongoDB, Redis, etc.
 5. Choisissez le mode :
-   - `single` pour le développement ou la petite charge ;
-   - `ha` pour la production avec réplication et consensus.
+   - **single** pour le développement ou la petite charge ;
+   - **ha** pour la production avec réplication et consensus.
 
-Une fois créé, le nœud de base de données s'affiche avec son état et les points de connexion attendus.
+
+![champs a remplir pour le noeud database](/img/screenshots/fr/database1.png)
 
 ## 3. Connecter votre application
 
@@ -35,12 +36,14 @@ La logique est la même que pour les autres liens du canvas :
 
 Les variables typiques sont :
 
-- `DATABASE_HOST`
-- `DATABASE_PORT`
-- `DATABASE_USER`
-- `DATABASE_NAME`
-- `DATABASE_PASSWORD`
-- `DATABASE_URL`
+- **DATABASE_HOST**
+- **DATABASE_PORT**
+- **DATABASE_USER**
+- **DATABASE_NAME**
+- **DATABASE_PASSWORD**
+- **DATABASE_URL**
+
+![détails du reséau de la database généré](/img/screenshots/fr/reseau-genere.png)
 
 Le but est de faire passer l'application du stade "config d'infra manuelle" à "service prêt à démarrer avec des informations correctes".
 
@@ -70,9 +73,9 @@ Le dépôt cible documente explicitement un mode PostgreSQL HA basé sur Patroni
 
 Un projet web peut être dessiné ainsi :
 
-- `web` (container)
-- connecté en `database` à `postgres`
-- exposé via `gateway` sur le domaine public
+- **web** (container)
+- connecté en **database** à **postgres**
+- exposé via **gateway** sur le domaine public
 
 Le moteur publie ensuite un plan de déploiement qui inclut :
 
