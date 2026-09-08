@@ -45,24 +45,24 @@ N'utilisez jamais un nombre **pair** de managers. Avec 2 managers, si l'un tombe
 
 Hullbay distingue deux notions de replicas, visibles directement sur le canvas et sur la page Santé :
 
-- **`desiredReplicas`** : Le nombre de répliques **que vous avez configuré** pour un service dans le canvas. C'est la source de vérité désirée, stockée en base de données PostgreSQL.
-- **`runningReplicas`** : Le nombre de répliques **réellement actives** à l'instant T, observé en temps réel via le WebSocket (`node.replicas`). Hullbay synchronise cette valeur automatiquement toutes les quelques secondes.
+- **desiredReplicas** : Le nombre de répliques **que vous avez configuré** pour un service dans le canvas. C'est la source de vérité désirée, stockée en base de données PostgreSQL.
+- **runningReplicas** : Le nombre de répliques **réellement actives** à l'instant T, observé en temps réel via le WebSocket (**node.replicas**). Hullbay synchronise cette valeur automatiquement toutes les quelques secondes.
 
-Sur le canvas, le nœud d'un service affiche une **pile 3D** dont la hauteur correspond au nombre de replicas en cours d'exécution. Si `runningReplicas < desiredReplicas`, le nœud passe au rouge (dérive détectée).
+Sur le canvas, le nœud d'un service affiche une **pile 3D** dont la hauteur correspond au nombre de replicas en cours d'exécution. Si runningReplicas < desiredReplicas, le nœud passe au rouge (dérive détectée).
 
 ### Placement des services sur le cluster
 
-Swarm distribue automatiquement les conteneurs sur les nœuds disponibles. Sur le canvas, vous pouvez voir en temps réel **sur quel nœud physique** chaque réplique tourne grâce aux `onNodePlacements` — une couleur différente est attribuée à chaque nœud via la bibliothèque `clusterNodeColors`.
+Swarm distribue automatiquement les conteneurs sur les nœuds disponibles. Sur le canvas, vous pouvez voir en temps réel **sur quel nœud physique** chaque réplique tourne grâce aux onNodePlacements — une couleur différente est attribuée à chaque nœud via la bibliothèque clusterNodeColors.
 
 ### Haute Disponibilité (HA) des bases de données
 
 Lorsque vous ajoutez une base de données sur le canvas, Hullbay vous propose un **mode HA** avec deux paramètres :
 
-- **`replicas`** : Nombre de répliques de lecture de la base de données.
-- **`consensusReplicas`** : Nombre de nœuds participant au vote de consensus pour l'élection du leader (ex: pour les bases de données de type Galera Cluster ou Patroni).
+- **replicas** : Nombre de répliques de lecture de la base de données.
+- **consensusReplicas** : Nombre de nœuds participant au vote de consensus pour l'élection du leader (ex: pour les bases de données de type Galera Cluster ou Patroni).
 
 :::info Mode simple vs mode HA
-Pour un environnement de développement ou à faible charge, un réplica unique (`replicas: 1`) est suffisant. En production multi-nœuds, activez le mode HA et assurez-vous d'avoir assez de Workers pour distribuer les répliques sur des machines différentes — cela garantit la disponibilité en cas de panne d'un nœud.
+Pour un environnement de développement ou à faible charge, un réplica unique (**replicas: 1**) est suffisant. En production multi-nœuds, activez le mode HA et assurez-vous d'avoir assez de Workers pour distribuer les répliques sur des machines différentes — cela garantit la disponibilité en cas de panne d'un nœud.
 :::
 
 ---
@@ -100,7 +100,7 @@ Les clés SSH de l'outil sont chiffrées au repos. Leur perte (si vous perdez MF
 
 ---
 
-![Formulaire d'ajout de serveur — choisir cluster ou créer un nouveau cluster](/img/screenshots/fr/guides-add-server-form-01.svg)
+![Formulaire d'ajout de serveur — choisir cluster ou créer un nouveau cluster](/img/screenshots/fr/role-serveur.png)
 
 ## Ajouter un serveur au cluster {#ajouter-un-serveur}
 

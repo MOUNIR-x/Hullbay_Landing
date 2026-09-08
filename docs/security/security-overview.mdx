@@ -69,7 +69,7 @@ La perte de ces clés rend :
 La plateforme Hullbay communique avec les serveurs de votre infrastructure (que ce soit pour l'API Docker sur le port 2375 ou l'administration Caddy sur le port 2019) d'une manière hautement sécurisée.
 
 Ces ports d'administration ne sont **jamais exposés publiquement**, quel que soit l'état du pare-feu du serveur.
-Ils sont publiés exclusivement sur l'interface locale (`127.0.0.1`) du serveur distant lors du déploiement. 
+Ils sont publiés exclusivement sur l'interface locale (**127.0.0.1**) du serveur distant lors du déploiement. 
 
 Hullbay y accède exclusivement via des **tunnels SSH éphémères**, en réutilisant la clé de maintenance posée pendant le provisionnement initial. Aucune action manuelle n'est requise de votre part pour sécuriser ces ports.
 

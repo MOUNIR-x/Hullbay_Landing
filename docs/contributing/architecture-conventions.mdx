@@ -6,9 +6,9 @@ Cette page décrit les conventions internes de Hullbay, en particulier le modèl
 
 Le code est structuré autour de plusieurs packages :
 
-- `packages/shared` : définitions et validation partagées ;
-- `packages/api` : backend Fastify / orchestration ;
-- `packages/web` : interface utilisateur.
+- **packages/shared** : définitions et validation partagées ;
+- **packages/api** : backend Fastify / orchestration ;
+- **packages/web** : interface utilisateur.
 
 Le package partagé est l'élément central : les schémas de projet, de nœud, d'arête et des règles de validation sont définis là, puis réutilisés par le backend et le frontend.
 
@@ -28,7 +28,7 @@ Le design du dépôt tend à centraliser les handlers d'événements dans des fi
 
 ## 4. Validation frontière
 
-Les modules de type `projects`, `servers`, `database` ou `updates` doivent se baser sur :
+Les modules de type **projects**, **servers**, **database** ou **updates** doivent se baser sur :
 
 - des schémas de validation partagés ;
 - des régles de sécurité roles-based ;

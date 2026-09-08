@@ -43,4 +43,4 @@ docker ps --filter "name=<service_name>"
 docker inspect <CONTAINER_ID> --format '{{json .Config.Labels}}'
 ```
 
-> **Note :** Les labels clefs utilisés par Hullbay incluent `bozando.projectId`, `bozando.nodeName`, `bozando.spec`, et `bozando.system=true` pour les ressources système. Ces labels agissent comme une source de vérité secondaire.
+> **Note :** Les labels clefs utilisés par Hullbay incluent **bozando.projectId**, **bozando.nodeName**, **bozando.spec**, et **bozando.system=true** pour les ressources système. Ces labels agissent comme une source de vérité secondaire.

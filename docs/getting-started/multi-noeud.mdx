@@ -6,9 +6,9 @@ Hullbay n'est pas limité à un seul serveur. Le mécanisme de provisioning du p
 
 Quand vous lancez un premier serveur, il devient le point d'entrée du cluster. Les serveurs suivants peuvent ensuite être ajoutés comme :
 
-- `manager` pour le contrôle du cluster ;
-- `worker` pour l'exécution des services applicatifs ;
-- éventuellement `database` ou `consensus` selon les composants de la topologie.
+- **manager** pour le contrôle du cluster ;
+- **worker** pour l'exécution des services applicatifs ;
+- éventuellement **database** ou **consensus** selon les composants de la topologie.
 
 La logique backend utilise un flux de provisionnement SSH qui ajoute le nœud au cluster Swarm et enregistre la machine dans l'instance Hullbay.
 

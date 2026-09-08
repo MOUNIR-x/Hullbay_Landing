@@ -1,25 +1,27 @@
 # Variables d'environnement
 
-Hullbay s'appuie sur un fichier `.env` de configuration pour gérer les secrets, les URLs, et les paramètres critiques de l'instance.
+Hullbay s'appuie sur un fichier **.env** de configuration pour gérer les secrets, les URLs, et les paramètres critiques de l'instance.
 
 ## 1. Variables essentielles
 
-Le dépôt cible fournit un `.env.template` commenté qui couvre les éléments suivants :
+Le dépôt cible fournit un **.env.template** commenté qui couvre les éléments suivants :
 
-- `DATABASE_URL` : point de connexion PostgreSQL ;
-- `REDIS_URL` : connexion Redis ;
-- `JWT_SECRET` : signature des tokens d'authentification ;
-- `MFA_ENCRYPTION_KEY` : chiffrement des données relatives à la MFA ;
-- `PUBLIC_HOST` : nom de domaine public / hôte de publication ;
-- `IMAGE_TAG` : tag des images Docker utilisées ;
-- `GHCR_OWNER` : propriétaire des images GitHub Container Registry.
+![contenu fichier environnement privé](/img/screenshots/fr/env.png)
+
+- **DATABASE_URL** : point de connexion PostgreSQL ;
+- **REDIS_URL** : connexion Redis ;
+- **JWT_SECRET** : signature des tokens d'authentification ;
+- **MFA_ENCRYPTION_KEY** : chiffrement des données relatives à la MFA ;
+- **PUBLIC_HOST** : nom de domaine public / hôte de publication ;
+- **IMAGE_TAG** : tag des images Docker utilisées ;
+- **GHCR_OWNER** : propriétaire des images GitHub Container Registry.
 
 ## 2. Sécurité
 
 Les variables suivantes sont particulièrement sensibles :
 
-- `JWT_SECRET`
-- `MFA_ENCRYPTION_KEY`
+- **JWT_SECRET**
+- **MFA_ENCRYPTION_KEY**
 - toute clé SSH ou tout secret de registre
 
 Le dépôt insiste sur le fait qu'elles doivent être sauvegardées hors du serveur, car leur perte rendrait les tokens invalides ou empêcherait de déchiffrer les secrets stockés.
@@ -38,7 +40,7 @@ IMAGE_TAG=latest
 
 ## 4. Bonnes pratiques
 
-- ne versionnez jamais le `.env` réel ;
+- ne versionnez jamais le **.env** réel ;
 - utilisez des valeurs aléatoires fortes ;
 - changez les secrets uniquement pendant une fenêtre de maintenance planifiée ;
 - vérifiez la présence de la clé MFA avant d'exposer l'instance en production.
