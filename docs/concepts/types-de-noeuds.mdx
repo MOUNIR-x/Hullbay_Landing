@@ -4,7 +4,7 @@ Hullbay adopte un modèle de canvas explicite où chaque nœud a un type défini
 
 ## 1. container
 
-![](/img/screenshots/fr/container.png)
+![Exemple de nœud container dans le canvas Hullbay](/img/screenshots/fr/container.png)
 
 Le nœud **container** représente un service Docker que vous souhaitez exécuter. Il permet de configurer :
 
@@ -17,7 +17,7 @@ Le nœud **container** représente un service Docker que vous souhaitez exécute
 
 ## 2. network
 
-![](/img/screenshots/fr/network.png)
+![Exemple de nœud réseau overlay dans Hullbay](/img/screenshots/fr/network.png)
 
 Le nœud **network** représente un réseau overlay Docker. Il sert à isoler ou relier les services d'un même projet ou d'un cluster.
 
@@ -29,13 +29,13 @@ Il est indispensable pour :
 
 ## 3. volume
 
-![](/img/screenshots/fr/volume.png)
+![Exemple de volume persistant attaché à un service Hullbay](/img/screenshots/fr/volume.png)
 
 Le nœud **volume** représente un stockage persistant attaché à un conteneur. Son rôle est de garantir que les données survivent aux redémarrages du service.
 
 ## 4. gateway
 
-![](/img/screenshots/fr/gateway.png)
+![Exemple de nœud gateway exposant un service via Hullbay](/img/screenshots/fr/gateway.png)
 
 Le nœud **gateway** représente une route ou un endpoint public. Entièrement intégré, il est utilisé pour exposer un service via Caddy avec gestion TLS et reverse proxy.
 
@@ -43,7 +43,7 @@ C'est le mécanisme qui permet d'éviter d'écrire manuellement le reverse proxy
 
 ## 5. database
 
-![](/img/screenshots/fr/database.png)
+![Exemple de nœud base de données avec support HA dans Hullbay](/img/screenshots/fr/database.png)
 
 Le nœud **database** est le plus important pour les cas de production. Il représente une source de données intégrée dans le canvas, avec support pour :
 
