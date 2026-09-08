@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="220" viewBox="0 0 900 220">
-  <rect width="100%" height="100%" fill="#fbfdff"/>
-  <rect x="16" y="16" width="868" height="188" fill="#fff" stroke="#e6eef6" rx="6"/>
-  <text x="36" y="48" font-family="Inter, Arial, sans-serif" font-size="18" fill="#0b1220">Liste des clusters — Default + autres</text>
-  <rect x="40" y="80" width="240" height="36" fill="#eef2ff" rx="6"/>
-  <text x="56" y="105" font-size="12" fill="#3730a3">Default — 1 serveur</text>
-  <rect x="40" y="128" width="240" height="36" fill="#f1f5f9" rx="6"/>
-  <text x="56" y="153" font-size="12" fill="#0f172a">prod-eu — 3 serveurs</text>
-</svg>
