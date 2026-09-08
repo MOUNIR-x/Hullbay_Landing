@@ -1,5 +1,8 @@
 # Multi-cluster
 
+
+![](/img/screenshots/fr/clusters.png)
+
 Hullbay n'a pas été conçu comme un outil monolithique "un cluster = une instance". Une installation Hullbay peut gérer plusieurs clusters Docker Swarm indépendants, à partir d'une même base de contrôle et d'une même UI.
 
 ## 1. Pourquoi c'est utile
@@ -20,6 +23,15 @@ L'instance Hullbay joue le rôle d'un plan de contrôle global :
 - elle sait quels clusters sont connus ;
 - un projet ou une ressource est rattaché à un cluster spécifique ;
 - le système peut monter plusieurs topologies indépendantes dans la même vue de gestion.
+
+### Cluster par défaut et modes d'ajout
+
+Une instance Hullbay crée automatiquement un **cluster Default** lors de la première initialisation. Ce cluster est utilisé par défaut pour les nouveaux projets et sert de point d'entrée simple pour les utilisateurs qui ne souhaitent pas gérer plusieurs clusters.
+
+Il existe deux façons principales d'ajouter de la capacité :
+
+- **Ajouter un serveur à un cluster existant** — via la page **Serveurs** (sélectionnez le cluster dans le formulaire). Voir le guide : [Ajouter un nouveau serveur au cluster](../guides/infrastructure#ajouter-un-serveur).
+- **Créer un nouveau cluster** — via la page **Clusters** : le formulaire crée le cluster puis provisionne le premier serveur. Voir : [Créer un nouveau cluster](../guides/infrastructure#creer-un-nouveau-cluster).
 
 Il ne s'agit pas de "fusionner les clusters" dans une seule ressource. Il s'agit plutôt de permettre qu'un opérateur pilote plusieurs environnements cohérents depuis un seul service de contrôle.
 

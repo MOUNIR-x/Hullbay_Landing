@@ -64,18 +64,14 @@ Une fois l'installation terminée, le script affiche l'URL d'accès :
 
 ### Créer le compte propriétaire
 
-Au premier lancement, créez le compte **Owner** via l'endpoint de bootstrap :
+Au premier lancement, Hullbay affiche automatiquement l'écran de **création du premier compte** (Owner). 
+l'écran de connexion bascule en **formulaire de création du compte Owner** : remplissez `email`, `password` et `confirm password` puis validez.
+3. Une fois le formulaire soumis, le compte Owner est créé et vous êtes automatiquement connecté.
 
-```bash
-curl -X POST "https://ops.mon-domaine.fr/api/auth/bootstrap" \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@example.com","password":"votre-mot-de-passe-securise"}'
-```
-
-Remplacez l'URL par celle affichée à la fin de l'installation.
+![](/img/screenshots/fr/mfa-activate.png)
 
 :::warning Sécurité
-Activez la **MFA (TOTP)** dans les paramètres du compte **avant** d'exposer Hullbay sur Internet. L'authentification à deux facteurs est une exigence de sécurité du produit.
+Activez la **MFA (TOTP)** dans les paramètres du compte **avant** d'exposer Hullbay sur Internet. L'authentification à deux facteurs demeure fortement recommandée.
 :::
 
 ---

@@ -62,7 +62,7 @@ export function Hero() {
   };
 
   return (
-    <section ref={sectionRef} className="pt-12 text-center md:pt-20">
+    <section ref={sectionRef} className="pt-28 text-center md:pt-36">
       <Container className="mx-auto max-w-[1040px]">
         {/* Eyebrow */}
         <Eyebrow className="flex items-center justify-center gap-2">
@@ -112,7 +112,7 @@ export function Hero() {
       </Container>
 
       {/* Canvas interactif */}
-      <div className="mx-auto max-w-[1080px] px-5 pb-[90px]">
+      <div className="mx-auto w-full max-w-[1300px] px-6 pb-[120px] flex justify-center">
         <HeroCanvas />
       </div>
     </section>

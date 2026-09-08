@@ -8,6 +8,12 @@ import {
   UserGroup,
 } from "@medusajs/icons";
 import { Container, DisplayHeading, Eyebrow, Section } from "./primitives";
+import imgCanvas from "../../assets/images/canvas.png";
+import imgUpdate from "../../assets/images/update.png";
+import imgUsers from "../../assets/images/users.png";
+import imgJournal from "../../assets/images/journal.png";
+import imgScaling from "../../assets/images/auto-scaling.png";
+import imgSecrets from "../../assets/images/secrets.png";
 
 const DURATION = 6000;
 
@@ -18,7 +24,7 @@ const FEATURES = [
     title: "Canvas visuel",
     subtitle: "Conception de cluster sans effort",
     text: "Glissez, déposez et organisez vos applications en quelques clics. Votre infrastructure Docker Swarm se dessine visuellement, sans avoir à manipuler de fichiers complexes.",
-    imageSrc: "/images/features/canvas-demo.png",
+    imageSrc: imgCanvas,
     codeSnippet: `# Topologie visuelle Hullbay
 services:
   application:
@@ -32,7 +38,7 @@ services:
     title: "Simulation préalable",
     subtitle: "Déploiements 100% sécurisés",
     text: "Visualisez exactement ce qui va changer avant chaque mise à jour. Hullbay simule l'impact sur vos serveurs Swarm pour vous garantir zéro interruption de service.",
-    imageSrc: "/images/features/plan-demo.png",
+    imageSrc: imgUpdate,
     codeSnippet: `[Hullbay Engine] Analyse de la mise à jour :
   ~ Mise à niveau progressive des serveurs
   + Allocation des ressources à chaud
@@ -45,7 +51,7 @@ Résultat : 0 coupure pour vos utilisateurs.`,
     title: "Gestion des accès",
     subtitle: "Travail d'équipe maîtrisé",
     text: "Attribuez les bons droits à chaque membre de votre équipe. Protégez vos environnements critiques tout en laissant la liberté d'expérimenter en toute sécurité.",
-    imageSrc: "/images/features/roles-demo.png",
+    imageSrc: imgUsers,
     codeSnippet: `# Politiques d'accès par rôle
 Administrateur -> Contrôle total des clusters
 Opérateur     -> Mises à jour & Auto scaling
@@ -57,7 +63,7 @@ Observateur   -> Consultation des métriques`,
     title: "Traçabilité complète",
     subtitle: "Historique clair et lisible",
     text: "Conservez une mémoire exacte de toutes les actions effectuées sur vos clusters. Qui a déployé, quand et avec quel impact : tout est consigné sans effort.",
-    imageSrc: "/images/features/audit-demo.png",
+    imageSrc: imgJournal,
     codeSnippet: `# Journal des actions système
 [Horodatage]  2026-08-20 18:00
 [Utilisateur] équipe-dev
@@ -70,7 +76,7 @@ Observateur   -> Consultation des métriques`,
     title: "Auto scaling",
     subtitle: "Adaptation instantanée",
     text: "Absorbez les pics de trafic sans sourciller. Exploitez la puissance native de Docker Swarm pour dupliquer vos services à la demande en une seconde.",
-    imageSrc: "/images/features/scaling-demo.png",
+    imageSrc: imgScaling,
     codeSnippet: `# Ajustement de la charge
 Charge détectée : Hausse de trafic
 Action          : Passage de 2 à 8 répliques
@@ -82,7 +88,7 @@ Statut          : Répartition automatique active`,
     title: "Sécurité native",
     subtitle: "Protection de vos données",
     text: "Vos mots de passe et clés de chiffrement sont isolés et protégés par la sécurité native de Docker Swarm, sans aucune intervention manuelle à risque.",
-    imageSrc: "/images/features/secrets-demo.png",
+    imageSrc: imgSecrets,
     codeSnippet: `# Chiffrement des secrets Swarm
 [Coffre-fort] Mots de passe chiffrés
 [Injection]   Transmis uniquement en mémoire vive
@@ -215,7 +221,7 @@ export function Features() {
                 <img
                   src={activeFeature.imageSrc}
                   alt={activeFeature.title}
-                  className="h-full w-full object-cover object-top transition-opacity duration-300"
+                  className="h-full w-full object-contain object-center transition-opacity duration-300"
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}

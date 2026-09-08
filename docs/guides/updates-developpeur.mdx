@@ -1,0 +1,106 @@
+---
+title: Mises à jour de l'instance — Guide développeur
+---
+
+<!-- Imported from Fotetsa/hullbay master: docs/updates-guide-developpeur.md -->
+
+# Mises à jour de l'instance — Guide développeur
+
+## 1. Vue d'ensemble
+
+Le système permet de mettre à jour l'installation hullbay depuis l'interface, sans SSH. Pipeline :
+
+```
+apply → backup pg_dump → pull images GHCR → rolling update web → rolling update api (SELF-TERMINATING : le process meurt) → finalisation au boot suivant
+```
+
+Pourquoi une finalisation au boot ? L'API se remplace elle-même : son conteneur est recréé pendant l'update, le process meurt avant de marquer la fin. Au démarrage, la nouvelle API (`finalizeOrphanUpdates`) compare le tag de l'image **réellement déployée** du service api (Docker, pas l'env) aux updates orphelines `running` :
+
+- tag atteint → `success`, et le step `api` est basculé en `success` (le process qui meurt a été remplacé)
+- tag non atteint → `failed` + rollback automatique (restauration du dump puis ancien tag).
+
+
+## 2. Fichiers
+
+### Backend
+(`packages/api/src/modules/updates/`)
+
+| Fichier | Rôle |
+|---|---|
+| `github.ts` | `GitHubReleasesService` : lecture releases GitHub, parseur **semver maison** (`compareVersions`), cache TTL 5 min par (canal, limit), ne cache pas les erreurs. Singleton `githubReleasesService` (fetch injectable en test). |
+| `updater.ts` | `UpdaterService` : `check`, `current`, `setChannel` (audit), `history` (paginé), `apply`, `rollback`, `finalizeOrphanUpdates`, `pgEnv()`. |
+| `routes.ts` | Routes Fastify `/api/updates/*`, toutes `owner` (RBAC `requireRole("owner")`). |
+
+### Web
+
+| Fichier | Rôle |
+|---|---|
+| `lib/api.ts` | Types + méthodes `updatesCheck/updatesHistory/updatesStatus/setUpdateChannel/applyUpdate/rollbackUpdate`. |
+| `lib/useUpdates.ts` | Hook `useUpdatesCheck` (poll 6 h, partagé badge + page). |
+| `lib/useUpdateSocket.ts` | Abonnement aux events `update.*` (broadcast serveur). |
+| `pages/UpdatesPage.tsx` | Page : toggle bêta, carte Instance, versions publiées, pipeline live dans la carte, historique, modal de confirmation, rollback. |
+
+
+## 3. API (résumé)
+
+Routes (toutes owner-only, JWT Bearer) :
+
+| Méthode | Route | Corps / Query |
+|---|---|---|
+| GET | `/api/updates/check?channel=stable|beta` | — |
+| GET | `/api/updates/current` | — |
+| PUT | `/api/updates/channel` | `{ channel: "stable"|"beta" }` |
+| GET | `/api/updates/history?limit&offset&status` | limit ≤ 100, status enum |
+| GET | `/api/updates/status/:id` | — |
+| POST | `/api/updates/apply` | `{ channel?, version? }` → 202 `{ id }` |
+| POST | `/api/updates/:id/rollback` | → 202 `{ id, status: "running" }` (id = nouvel enregistrement rollback) |
+
+
+## 4. Temps réel
+
+Le serveur relaie les events via l'event bus (`update.step`, `update.progress`, `update.done`, `update.error`) en **broadcast global** sur tous les sockets connectés. Le client filtre par `updateId`.
+
+> Note : `update.*` est broadcasté à tous les rôles connectés (viewer/operator inclus). Fuite mineure de métadonnées de versions — à durcir (filtre par rôle) si besoin.
+
+
+## 5. Variables d'environnement
+
+| Variable | Rôle |
+|---|---|
+| `GITHUB_TOKEN` | Optionnel — augmente le quota GitHub (60 → 5000 req/h), sinon cache TTL. |
+| `GITHUB_OWNER` / `GITHUB_REPO` | Défaults : `GHCR_OWNER` / `hullbay`. |
+| `IMAGE_REGISTRY` | Override du registre d'images hullbay (défaut `ghcr.io`). Usage : test local/registre de confiance — voir §6. |
+| `BACKUP_DIR` | Répertoire des dumps (défaut `/app/backups`, volume `ops_backups`). |
+| `DATABASE_URL` | **Jamais** passée en argv du pg_dump (visible via `ps`) — uniquement via env `PG*` construits par `pgEnv()` |
+
+
+## 6. Pièges connus
+
+1. **`logs` JSON : ne jamais utiliser `{ push: … }`** — Prisma 5.x stocke `{ push: … }` comme **objet littéral** (`{"push": …}`), pas un append. Un spread sur ce résultat lève `is not iterable` et casse le rollback/la finalisation. Toujours read-modify-write avec un garde `Array.isArray` (comme `log` / `logTo` dans `updater.ts`).
+2. **Parsing du tag d'image** — `currentSystemTag` lit le tag après le dernier `/` puis le dernier `:` : robuste aux registres avec port (`host:port/owner/app:tag`). Ne jamais utiliser `/:(.+)$/` (le port du registre casse le match).
+3. **Step ...**
+
+
+## 7. Points sensibles
+
+1. **Ordre du rollback** : le restore DB (`pg_restore`) précède **tout** redeploy — le redeploy API tue le process. Le statut `rolled_back` est persisté avant le redeploy (délibéré).
+2. **Modèle du rollback** : le rollback manuel crée un **nouvel enregistrement** (historique préservé) lié à l'update source par `rollbackOfId`. L'update source ne devient `rolledBack=true` qu'une fois le restore réussi.
+
+
+## 8. Tests
+
+```bash
+cd packages/api
+npx vitest run src/modules/updates
+npm run test:coverage
+npm run typecheck
+```
+
+Web (E2E, API stubée — aucun service requis) :
+
+```bash
+cd packages/web
+npm run e2e:install
+npm run e2e
+```
+

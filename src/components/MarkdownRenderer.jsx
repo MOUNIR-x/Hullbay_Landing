@@ -22,10 +22,55 @@ function CopyButton({ text }) {
 }
 
 const resolveDocLink = (href) => {
-  if (!href?.startsWith("/docs/")) return href;
-  let path = href.replace(/^\/docs\//, "");
-  if (path === "concepts") path = "Concepts";
-  return `#${path}`;
+  if (!href) return href;
+
+  // Preserve absolute anchors and external links
+  if (href.startsWith("#") || href.startsWith("http://") || href.startsWith("https://")) {
+    return href;
+  }
+
+  // Preserve asset links (images, static assets)
+  if (href.startsWith("/img/") || href.startsWith("/assets/") || /\.(svg|png|jpe?g|webp|gif)$/.test(href)) {
+    return href;
+  }
+
+  // Normalize /docs/ style links
+  if (href.startsWith("/docs/")) {
+    let p = href.replace(/^\/docs\//, "");
+    p = p.replace(/\.mdx$/, '');
+    return `#${p}`;
+  }
+
+  // Resolve relative links like ../getting-started/installation
+  // against the current document hash (e.g. #introduction/Pourquoi-hullbay)
+  try {
+    const current = window.location.hash.substring(1).split("#")[0].split("?")[0] || "";
+    let path = href.replace(/^\/+/, ""); // remove any leading slashes
+
+    if (path.startsWith("./") || path.startsWith("../")) {
+      const baseSegments = current ? current.split('/').slice(0, -1) : [];
+      const parts = path.split('/');
+      const resolved = [...baseSegments];
+      for (const p of parts) {
+        if (p === '..') {
+          resolved.pop();
+        } else if (p === '.' || p === '') {
+          continue;
+        } else {
+          resolved.push(p);
+        }
+      }
+      path = resolved.join('/');
+    }
+
+    // Strip .mdx extension if present
+    path = path.replace(/\.mdx$/, '');
+
+    // If the link already looks like a doc id (category/page), just return as hash
+    return `#${path}`;
+  } catch (e) {
+    return href;
+  }
 };
 
 // Transform Docusaurus-style admonitions into simple HTML
@@ -55,9 +100,10 @@ export default function MarkdownRenderer({ rawContent }) {
         .replace(/\s+/g, '-');
       return (
         <h2
-          id={id}
-          className="group relative text-xl font-bold tracking-tight text-gray-900 dark:text-white mt-8 mb-4 border-b border-gray-100 dark:border-gray-800 pb-1.5"
-        >
+            id={id}
+            style={{ scrollMarginTop: '90px' }}
+            className="group relative text-xl font-bold tracking-tight text-gray-900 dark:text-white mt-8 mb-4 border-b border-gray-100 dark:border-gray-800 pb-1.5"
+          >
           <a
             href={`#${window.location.hash.split('#')[1]?.split('?')[0] || "" }#${id}`}
             className="absolute -left-5 top-0.5 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-500 transition-opacity pr-2 font-normal"
@@ -76,9 +122,10 @@ export default function MarkdownRenderer({ rawContent }) {
         .replace(/\s+/g, '-');
       return (
         <h3
-          id={id}
-          className="group relative text-base font-bold tracking-tight text-gray-900 dark:text-white mt-6 mb-3"
-        >
+            id={id}
+            style={{ scrollMarginTop: '90px' }}
+            className="group relative text-base font-bold tracking-tight text-gray-900 dark:text-white mt-6 mb-3"
+          >
           <a
             href={`#${window.location.hash.split('#')[1]?.split('?')[0] || "" }#${id}`}
             className="absolute -left-5 top-0.5 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-500 transition-opacity pr-2 font-normal"
