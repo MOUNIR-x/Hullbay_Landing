@@ -4,11 +4,9 @@
 Ce guide décrit comment déployer **Hullbay** sur un serveur VPS ou une machine physique fraîche. L'installation est **idempotente** : vous pouvez relancer le script sans risquer de corrompre une instance existante.
 
 :::warning Prérequis système
-- Un serveur sous **Ubuntu 22.04+** ou **Debian 12+**
 - Un utilisateur avec les privilèges sudo (ou accès root)
 - Les ports **80** et **443** ouverts (Caddy + Let's Encrypt)
-- **Minimum recommandé** : 2 vCPU, 4 Go de RAM
-- Accès réseau sortant (téléchargement Docker, images GHCR, certificats TLS)
+- **Minimum recommandé** : 1 vCPU, 1 Go de RAM
 :::
 
 ---
@@ -33,45 +31,31 @@ curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh |
 
 ---
 
-## Variables d'environnement (optionnelles)
+## Configuration de l'installation
 
-Vous pouvez personnaliser l'installation en exportant ces variables **avant** de lancer le script :
+Le script d'installation initialise le dépôt et les services de base. La configuration de l'instance se fait ensuite dans l'interface d'administration de Hullbay.
 
-| Variable | Défaut | Description |
-| :--- | :--- | :--- |
-| GHCR_OWNER | fotetsa | Propriétaire des images sur GitHub Container Registry |
-| IMAGE_TAG | latest | Tag des images Docker (ghcr.io/\<owner\>/hullbay/api et /web) |
-| PUBLIC_HOST | *(vide)* | Domaine public pour HTTPS automatique via Let's Encrypt (ex. ops.example.com) |
-| INSTALL_DIR | /opt/hullbay | Dossier d'installation sur le serveur |
 
-Exemple avec un domaine personnalisé :
-
-```bash
-export PUBLIC_HOST=ops.mon-domaine.fr
-curl -fsSL https://raw.githubusercontent.com/fotetsa/hullbay/master/install.sh | sudo bash
-```
-
-Sans PUBLIC_HOST, Hullbay est accessible en **HTTP** sur l'adresse IP du serveur (port 80).
 
 ---
 
 ## Première connexion et bootstrap
 
-Une fois l'installation terminée, le script affiche l'URL d'accès :
+Une fois l'installation terminée, le script affiche l'URL d'accès de l'instance.
 
-- Avec domaine : https://\<PUBLIC_HOST\>
-- Sans domaine : http://\<IP-du-serveur\>
+Dans tous les cas, ouvrez l'URL affichée dans le navigateur pour finaliser la première configuration.
 
 ### Créer le compte propriétaire
 
-Au premier lancement, Hullbay affiche automatiquement l'écran de **création du premier compte** (Owner). 
-l'écran de connexion bascule en **formulaire de création du compte Owner** : remplissez `email`, `password` et `confirm password` puis validez.
-3. Une fois le formulaire soumis, le compte Owner est créé et vous êtes automatiquement connecté.
+![Écran de création du premier compte propriétaire Hullbay](/img/screenshots/fr/register.png)
 
-![](/img/screenshots/fr/mfa-activate.png)
+Au premier lancement, Hullbay affiche automatiquement l'écran de **création du premier compte** (Owner). 
+l'écran de connexion bascule en **formulaire de création du compte Owner** : remplissez `email`, `password` et `confirm password` puis validez. Une fois le formulaire soumis, le compte Owner est créé et vous serez rediriger vers la page d'activation du MFA.
+
+![Activation de la MFA TOTP pour sécuriser l'accès au panneau Hullbay](/img/screenshots/fr/mfa-activate.png)
 
 :::warning Sécurité
-Activez la **MFA (TOTP)** dans les paramètres du compte **avant** d'exposer Hullbay sur Internet. L'authentification à deux facteurs demeure fortement recommandée.
+La **MFA (TOTP)** est **obligatoire** pour accéder au panneau. Les comptes doivent activer cette protection avant de pouvoir poursuivre l'accès au panel.
 :::
 
 ---
@@ -118,7 +102,7 @@ Si tous les conteneurs sont running et que l'URL s'ouvre dans le navigateur, pas
 | :--- | :--- |
 | Script échoue sur Docker Compose | Mettre à jour Docker (Compose v2 requis : docker compose version) |
 | Port 80/443 déjà utilisé | Libérer les ports ou arrêter le service conflictuel (nginx, apache2…) |
-| HTTPS ne fonctionne pas | Vérifier que PUBLIC_HOST pointe vers l'IP du serveur et que le port 443 est ouvert |
+| HTTPS ne fonctionne pas | Vérifier que le certificat et le port 443 sont bien accessibles depuis le réseau, puis relancer la configuration depuis l'interface |
 | .env existant conservé | Normal — le script ne régénère jamais les secrets d'une install existante |
 
 Pour plus de détails, consultez le guide [Dépannage](../guides/depannage).
