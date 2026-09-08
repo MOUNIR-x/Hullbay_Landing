@@ -1,5 +1,5 @@
 import { CheckCircleSolid, ShieldCheck, Sparkles } from "@medusajs/icons";
-import canvasPreview from "../../assets/images/image2.png";
+import canvasPreview from "../../assets/images/canvas.png";
 import { BodyText, Container, DisplayHeading, Eyebrow, Section, WindowDots } from "./primitives";
 
 export function ProductOverview() {
@@ -50,7 +50,7 @@ export function ProductOverview() {
               <img
                 src={canvasPreview}
                 alt="Démonstration visuelle du canvas interactif Hullbay"
-                className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.01]"
+                className="h-full w-full object-contain object-center transition-transform duration-700 ease-out group-hover:scale-[1.01]"
               />
             </div>
 

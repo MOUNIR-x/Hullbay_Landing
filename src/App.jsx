@@ -176,19 +176,27 @@ export default function App() {
                   {category.title}
                 </div>
                 <div className="space-y-1 pl-1">
-                  {category.items.map((item) => (
-                    <a
-                      key={item.id}
-                      href={`#${item.id}`}
-                      className={`flex w-full items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                        item.id === currentDocId
-                          ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white"
-                          : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-200"
-                      }`}
-                    >
-                      {item.label}
-                    </a>
-                  ))}
+                  {category.items.map((item) => {
+                    const key = item.id || item.href || item.label;
+                    const href = item.href ? item.href : `#${item.id}`;
+                    const isExternal = !!item.href;
+                    const isActive = item.id === currentDocId;
+                    return (
+                      <a
+                        key={key}
+                        href={href}
+                        target={isExternal ? "_blank" : undefined}
+                        rel={isExternal ? "noopener noreferrer" : undefined}
+                        className={`flex w-full items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                          isActive
+                            ? "bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white"
+                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/50 dark:hover:text-gray-200"
+                        }`}
+                      >
+                        {item.label}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             ))}

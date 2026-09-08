@@ -100,7 +100,21 @@ Les clés SSH de l'outil sont chiffrées au repos. Leur perte (si vous perdez MF
 
 ---
 
-## 3. Le Docker Socket Proxy (Sécurité)
+![Formulaire d'ajout de serveur — choisir cluster ou créer un nouveau cluster](/img/screenshots/fr/guides-add-server-form-01.svg)
+
+## Ajouter un serveur au cluster {#ajouter-un-serveur}
+
+La page **Serveurs** propose deux modes pour ajouter de la capacité : joindre un serveur à un cluster existant, ou créer un nouveau cluster en provisionnant le premier serveur du cluster. Lors du provisioning, vous pouvez soit sélectionner un `clusterId` existant, soit fournir un `newClusterName` pour fonder un cluster neuf.
+
+Si vous ne spécifiez rien, le serveur rejoint par défaut le **cluster Default** (créé automatiquement à l'installation). Voir aussi la section **Créer un nouveau cluster** ci-dessous.
+
+## Créer un nouveau cluster {#creer-un-nouveau-cluster}
+
+Pour créer un nouveau cluster, rendez-vous dans la page **Clusters** et utilisez le bouton **Nouveau cluster**. Le formulaire vous permet d'indiquer le nom du cluster et les informations du premier serveur (host, port, user, credential). Cette opération crée le cluster et provisionne immédiatement le premier serveur pour en devenir le manager.
+
+---
+
+## 4. Le Docker Socket Proxy (Sécurité)
 
 L'une des décisions architecturales les plus importantes de Hullbay est de **ne jamais monter directement le socket Docker** (/var/run/docker.sock) dans le conteneur API.
 

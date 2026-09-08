@@ -1,5 +1,5 @@
 import { CheckCircleSolid, ShieldCheck, Sparkles } from "@medusajs/icons";
-import canvasPreview from "../../assets/images/image2.png";
+import clustersPreview from "../../assets/images/clusters.png";
 import { Reveal } from "./Reveal";
 import { BodyText, Container, DisplayHeading, Eyebrow, Section, WindowDots } from "./primitives";
 
@@ -77,9 +77,9 @@ export function ProductOverview() {
               {/* Zone Visuelle */}
               <div className="lg:col-span-8 relative bg-zinc-950 overflow-hidden flex items-center justify-center min-h-[280px]">
                 <img
-                  src={canvasPreview}
-                  alt="Démonstration du Canvas Hullbay"
-                  className="w-full h-full object-cover object-left-top transition-transform duration-500 hover:scale-[1.01]"
+                  src={clustersPreview}
+                  alt="Vue des clusters Hullbay"
+                  className="w-full h-full object-contain object-left-top transition-transform duration-500 hover:scale-[1.01]"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/40 via-transparent to-transparent pointer-events-none" />
               </div>

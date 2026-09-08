@@ -28,9 +28,9 @@ export default function Footer() {
         <div className="footer-column">
           <h3>RESSOURCES</h3>
 
-          <a href="#">DOCUMENTATION</a>
-          <a href="#">GITHUB</a>
-          <a href="#">GUIDE DE DÉMARRAGE</a>
+          <a href="#introduction/Pourquoi-hullbay">Documentation</a>
+          <a href="#faq/faq">FAQ</a>
+          <a href="https://github.com/MOUNIR-x/hullbay/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a>
         </div>
 
         {/* Entreprise */}
