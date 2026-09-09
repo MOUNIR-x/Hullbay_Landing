@@ -1,3 +1,89 @@
+let changelogCache = null;
+let lastFetchTime = 0;
+const CACHE_TTL_MS = 60 * 1000; // 1 minute in-memory cache
+
+export const fetchRuntimeChangelog = async () => {
+  const now = Date.now();
+  if (changelogCache && (now - lastFetchTime < CACHE_TTL_MS)) {
+    return changelogCache;
+  }
+
+  const OWNER = 'Fotetsa';
+  const REPO = 'hullbay';
+
+  const timestamp = Date.now();
+  // 1. Try master branch (default), then main branch
+  const rawUrls = [
+    `https://raw.githubusercontent.com/${OWNER}/${REPO}/master/CHANGELOG.md?_t=${timestamp}`,
+    `https://raw.githubusercontent.com/${OWNER}/${REPO}/main/CHANGELOG.md?_t=${timestamp}`,
+  ];
+
+  for (const url of rawUrls) {
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (res.ok) {
+        const text = await res.text();
+        if (text && text.trim()) {
+          let out = text.trim();
+          if (!out.startsWith('#')) {
+            out = `# Changelog\n\n${out}`;
+          }
+          const result = { default: out };
+          changelogCache = result;
+          lastFetchTime = Date.now();
+          return result;
+        }
+      }
+    } catch (err) {
+      console.warn(`Fetch changelog from ${url} failed:`, err);
+    }
+  }
+
+  // 2. Fallback to GitHub Releases API
+  try {
+    const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=15`);
+    if (res.ok) {
+      const releases = await res.json();
+      if (Array.isArray(releases) && releases.length > 0) {
+        let md = `# Changelog\n\n`;
+        releases.forEach(rel => {
+          if (!rel.draft) {
+            md += `## ${rel.name || rel.tag_name}\n\n`;
+            if (rel.published_at) {
+              const date = new Date(rel.published_at).toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              });
+              md += `*Publié le ${date}*\n\n`;
+            }
+            md += `${rel.body || 'Aucune note de version fournie.'}\n\n---\n\n`;
+          }
+        });
+        const result = { default: md };
+        changelogCache = result;
+        lastFetchTime = Date.now();
+        return result;
+      }
+    }
+  } catch (err) {
+    console.warn('Fetch GitHub releases failed:', err);
+  }
+
+  // 3. Fallback to local changelog.mdx if bundled
+  try {
+    const local = await import('../../docs/ads/changelog.mdx?raw');
+    const content = local.default || local;
+    if (content && content.trim()) {
+      return { default: content };
+    }
+  } catch (_) {}
+
+  return {
+    default: `# Changelog\n\n> Impossible de récupérer le changelog depuis GitHub pour le moment. Vous pouvez consulter les releases directement sur [GitHub](https://github.com/${OWNER}/${REPO}/releases).\n`,
+  };
+};
+
 export const docFiles = {
   'introduction/Pourquoi-hullbay': () => import('../../docs/introduction/Pourquoi-hullbay.mdx?raw'),
   'introduction/architecture': () => import('../../docs/introduction/architecture.mdx?raw'),
@@ -38,7 +124,7 @@ export const docFiles = {
   'contributing/releases': () => import('../../docs/contributing/releases.mdx?raw'),
 
   'faq/faq': () => import('../../docs/faq/faq.mdx?raw'),
-  'ads/changelog': () => import('../../docs/ads/changelog.mdx?raw'),
+  'ads/changelog': fetchRuntimeChangelog,
 };
 
 export const sidebarConfig = [

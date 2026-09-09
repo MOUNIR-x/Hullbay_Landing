@@ -4,11 +4,8 @@
   "private": true,
   "scripts": {
     "start": "vite --host 0.0.0.0",
-    "prestart": "node ./scripts/fetch-changelog.mjs",
     "dev": "vite --host 0.0.0.0",
-    "predev": "node ./scripts/fetch-changelog.mjs",
     "build": "vite build",
-    "prebuild": "node ./scripts/fetch-changelog.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck": "tsc"
   },

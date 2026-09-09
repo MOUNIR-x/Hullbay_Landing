@@ -105,11 +105,11 @@ export default function TableOfContents({ content }) {
           On This Page
         </h4>
         <ul className="space-y-2 text-xs">
-          {headings.map((heading) => {
+          {headings.map((heading, index) => {
             const isActive = heading.id === activeId;
             return (
               <li
-                key={heading.id}
+                key={`${heading.id}-${index}`}
                 style={{ paddingLeft: `${(heading.level - 2) * 12}px` }}
               >
                 <a
