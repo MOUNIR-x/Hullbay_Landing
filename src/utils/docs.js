@@ -107,7 +107,7 @@ export const sidebarConfig = [
   {
     title: "DIVERS",
     items: [
-      { id: "ads/changelog", label: "Changelog", href: "https://github.com/MOUNIR-x/hullbay/blob/master/CHANGELOG.md" }
+      { id: "ads/changelog", label: "Changelog" }
     ]
   }
 ];

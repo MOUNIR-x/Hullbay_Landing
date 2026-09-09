@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -84,6 +84,45 @@ const transformDocusaurusCallouts = (content) => {
 
 export default function MarkdownRenderer({ rawContent }) {
   const processedContent = transformDocusaurusCallouts(rawContent);
+
+  // Support dynamic remote includes: <!-- GITHUB_CHANGELOG:<raw_url> -->
+  const [remoteContent, setRemoteContent] = useState(null);
+  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState(null);
+
+  useEffect(() => {
+    const match = (rawContent || "").match(/<!--\s*GITHUB_CHANGELOG:\s*(\S+)\s*-->/);
+    if (!match) {
+      setRemoteContent(null);
+      setRemoteLoading(false);
+      setRemoteError(null);
+      return;
+    }
+
+    const url = match[1];
+    let active = true;
+    setRemoteLoading(true);
+    setRemoteError(null);
+    fetch(url)
+      .then((r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        return r.text();
+      })
+      .then((text) => {
+        if (!active) return;
+        setRemoteContent(text);
+        setRemoteLoading(false);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setRemoteError(err.message || "Failed to fetch remote changelog");
+        setRemoteLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [rawContent]);
 
   // Custom components for markdown rendering matching Medusa UI
   const components = {
@@ -273,13 +312,33 @@ export default function MarkdownRenderer({ rawContent }) {
     }
   };
 
+  // If we're loading a remote file, show a local loading state inside the renderer
+  if (remoteLoading) {
+    return (
+      <div className="flex h-40 items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600 dark:border-gray-800 dark:border-t-blue-400" />
+      </div>
+    );
+  }
+
+  // If remote fetch failed, show an inline error and fall back to the processed content
+  const contentToRender = remoteContent !== null ? remoteContent : processedContent;
+  const maybeError = remoteError ? (
+    <div className="my-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-300">
+      Erreur lors de la récupération du changelog distant: {remoteError}
+    </div>
+  ) : null;
+
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeRaw]}
-      components={components}
-    >
-      {processedContent}
-    </ReactMarkdown>
+    <>
+      {maybeError}
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={components}
+      >
+        {contentToRender}
+      </ReactMarkdown>
+    </>
   );
 }
